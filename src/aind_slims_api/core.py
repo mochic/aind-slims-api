@@ -18,7 +18,7 @@ from pydantic import (
 )
 from pydantic.fields import FieldInfo
 import logging
-from typing import Literal, Optional
+from typing import Literal, Optional, TypeVar, Type
 
 from slims.slims import Slims, _SlimsApiException
 from slims.internal import (
@@ -132,6 +132,10 @@ class SlimsBaseModel(
     # TODO: Support attachments
 
 
+SlimsBaseModelTypeVar = TypeVar(
+    'SlimsBaseModelTypeVar', bound=SlimsBaseModel)
+
+
 class SlimsClient:
     """Wrapper around slims-python-api client with convenience methods"""
 
@@ -233,7 +237,12 @@ class SlimsClient:
         queries = [f"?{k}={v}" for k, v in kwargs.items()]
         return base_url + "".join(queries)
 
-    def add_model(self, model: SlimsBaseModel, *args, **kwargs) -> SlimsBaseModel:
+    def add_model(
+        self,
+        model: SlimsBaseModelTypeVar,
+        *args,
+        **kwargs
+    ) -> SlimsBaseModelTypeVar:
         """Given a SlimsBaseModel object, add it to SLIMS
         Args
             model (SlimsBaseModel): object to add
@@ -256,7 +265,7 @@ class SlimsClient:
                 by_alias=True,
             ),
         )
-        return type(model).model_validate(rtn)
+        return model.model_validate(rtn)
 
     def update_model(self, model: SlimsBaseModel, *args, **kwargs):
         """Given a SlimsBaseModel object, update its (existing) SLIMS record
