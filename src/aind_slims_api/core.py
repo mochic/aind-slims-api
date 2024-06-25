@@ -18,7 +18,7 @@ from pydantic import (
 )
 from pydantic.fields import FieldInfo
 import logging
-from typing import Literal, Optional, TypeVar, Type
+from typing import Literal, Optional, TypeVar
 
 from slims.slims import Slims, _SlimsApiException
 from slims.internal import (
