@@ -265,7 +265,7 @@ class SlimsClient:
                 by_alias=True,
             ),
         )
-        return model.model_validate(rtn)
+        return type(model).model_validate(rtn)
 
     def update_model(self, model: SlimsBaseModel, *args, **kwargs):
         """Given a SlimsBaseModel object, update its (existing) SLIMS record
