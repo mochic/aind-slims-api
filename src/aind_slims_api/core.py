@@ -13,12 +13,13 @@ from functools import lru_cache
 from pydantic import (
     BaseModel,
     ValidationInfo,
+    ValidationError,
     field_serializer,
     field_validator,
 )
 from pydantic.fields import FieldInfo
 import logging
-from typing import Literal, Optional, TypeVar
+from typing import Any, Literal, Optional, Type, TypeVar
 
 from slims.slims import Slims, _SlimsApiException
 from slims.internal import (
@@ -202,6 +203,47 @@ class SlimsClient:
             raise e
 
         return records
+
+    def fetch_models(
+        self,
+        model: Type[SlimsBaseModelTypeVar],
+        *args,
+        sort: Optional[str | list[str]] = None,
+        start: Optional[int] = None,
+        end: Optional[int] = None,
+        **kwargs,
+    ) -> tuple[list[SlimsBaseModelTypeVar], list[dict[str, Any]]]:
+        """Fetch records from SLIMS and return them as SlimsBaseModel objects
+
+        Returns
+        -------
+        tuple:
+            list:
+                Validated SlimsBaseModel objects
+            list:
+                Dictionaries representations of objects that failed validation
+        """
+        response = self.fetch(
+            model._slims_table,
+            *args,
+            sort=sort or None,
+            start=start or None,
+            end=end or None,
+            **kwargs,
+        )
+
+        validated = []
+        unvalidated = []
+        for record in response:
+            try:
+                validated.append(
+                    model.model_validate(record)
+                )
+            except ValidationError as e:
+                logger.error(f"SLIMS data validation failed, {repr(e)}")
+                unvalidated.append(record.json_entity)
+
+        return validated, unvalidated
 
     @lru_cache(maxsize=None)
     def fetch_pk(self, table: SLIMSTABLES, *args, **kwargs) -> int | None:
