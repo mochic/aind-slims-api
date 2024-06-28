@@ -42,6 +42,7 @@ SLIMSTABLES = Literal[
     "Test",
     "User",
     "Groups",
+    "Instrument",
 ]
 
 
@@ -95,6 +96,11 @@ class SlimsBaseModel(
     def _validate(cls, value, info: ValidationInfo):
         """Validates a field, accounts for Quantities"""
         if isinstance(value, SlimsColumn):
+            # if value.name == "pk":
+            #     raise Exception("Bur")
+            # print(value.name)
+            # print(type(value))
+            # print(dir(value))
             if value.datatype == "QUANTITY":
                 unit_spec = _find_unit_spec(cls.model_fields[info.field_name])
                 if unit_spec is None:
@@ -224,14 +230,14 @@ class SlimsClient:
                 Dictionaries representations of objects that failed validation
         """
         response = self.fetch(
-            model._slims_table,
+            model._slims_table.default,  # TODO: consider changing fetch method
             *args,
-            sort=sort or None,
-            start=start or None,
-            end=end or None,
+            sort=sort,
+            start=start,
+            end=end,
             **kwargs,
         )
-
+        print(response)
         validated = []
         unvalidated = []
         for record in response:
@@ -298,6 +304,15 @@ class SlimsClient:
         fields_to_include = set(args) or None
         fields_to_exclude = set(kwargs.get("exclude", []))
         fields_to_exclude.add("pk")
+        import json
+        import pathlib
+        # dumped = model.model_dump_json(
+        #     include=fields_to_include,
+        #     exclude=fields_to_exclude,
+        #     **kwargs,
+        #     by_alias=True,
+        # )
+        # pathlib.Path("temp.json").write_text(dumped)
         rtn = self.add(
             model._slims_table,
             model.model_dump(
@@ -307,6 +322,7 @@ class SlimsClient:
                 by_alias=True,
             ),
         )
+        pathlib.Path("temp.json").write_text(json.dumps(rtn.json_entity))
         return type(model).model_validate(rtn)
 
     def update_model(self, model: SlimsBaseModel, *args, **kwargs):

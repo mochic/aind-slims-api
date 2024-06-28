@@ -71,3 +71,9 @@ def fetch_mouse_content(
         return mouse_details.json_entity
 
     return mouse
+
+
+if __name__ == "__main__":
+    fetch_mouse_content(
+        
+    )
