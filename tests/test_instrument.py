@@ -33,8 +33,7 @@ class TestInstrument(unittest.TestCase):
             Record(json_entity=r, slims_api=cls.example_client.db.slims_api)
             for r in json.loads(
                 (
-                    RESOURCES_DIR /
-                    "example_fetch_instrument_response.json_entity.json"
+                    RESOURCES_DIR / "example_fetch_instrument_response.json_entity.json"
                 ).read_text()
             )
         ]
@@ -47,41 +46,37 @@ class TestInstrument(unittest.TestCase):
         mock_log_warn: MagicMock,
     ):
         """Test fetch_instrument_content when successful and multiple are
-         returned from fetch
+        returned from fetch
         """
         mock_fetch.return_value = self.example_response + self.example_response
-        response = fetch_instrument_content(
-            self.example_client, "323_EPHYS1_OPTO")
-        self.assertEqual(
-            response.json_entity, self.example_response[0].json_entity
-        )
+        response = fetch_instrument_content(self.example_client, "323_EPHYS1_OPTO")
+        self.assertEqual(response.json_entity, self.example_response[0].json_entity)
         self.assertTrue(mock_log_warn.called)
 
     @patch("slims.slims.Slims.fetch")
     def test_fetch_fail(
-        self, mock_fetch: MagicMock,
+        self,
+        mock_fetch: MagicMock,
     ):
-        """Test fetch_instrument_content when invalid instrument name is given.
-        """
+        """Test fetch_instrument_content when invalid instrument name is given."""
         mock_fetch.return_value = []
         response = fetch_instrument_content(
-            self.example_client,
-            "Hopefully not a valid instrument name right?")
+            self.example_client, "Hopefully not a valid instrument name right?"
+        )
         self.assertTrue(response is None)
 
     @patch("slims.slims.Slims.fetch")
     def test_fetch_unvalidated_success(
-        self, mock_fetch: MagicMock,
+        self,
+        mock_fetch: MagicMock,
     ):
         """Test fetch_instrument_content when unvalidated instrument data
-         returned.
+        returned.
         """
         bad_return = deepcopy(self.example_response[0])
         bad_return.nstr_pk.value = "burrito"
         mock_fetch.return_value = [bad_return, bad_return]
-        response = fetch_instrument_content(
-            self.example_client,
-            "323_EPHYS1_OPTO")
+        response = fetch_instrument_content(self.example_client, "323_EPHYS1_OPTO")
         self.assertTrue(isinstance(response, dict))
 
 

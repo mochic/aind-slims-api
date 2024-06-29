@@ -139,8 +139,7 @@ class SlimsBaseModel(
     # TODO: Support attachments
 
 
-SlimsBaseModelTypeVar = TypeVar(
-    'SlimsBaseModelTypeVar', bound=SlimsBaseModel)
+SlimsBaseModelTypeVar = TypeVar("SlimsBaseModelTypeVar", bound=SlimsBaseModel)
 
 
 class SlimsClient:
@@ -241,9 +240,7 @@ class SlimsClient:
         unvalidated = []
         for record in response:
             try:
-                validated.append(
-                    model.model_validate(record)
-                )
+                validated.append(model.model_validate(record))
             except ValidationError as e:
                 logger.error(f"SLIMS data validation failed, {repr(e)}")
                 unvalidated.append(record.json_entity)
@@ -285,10 +282,7 @@ class SlimsClient:
         return base_url + "".join(queries)
 
     def add_model(
-        self,
-        model: SlimsBaseModelTypeVar,
-        *args,
-        **kwargs
+        self, model: SlimsBaseModelTypeVar, *args, **kwargs
     ) -> SlimsBaseModelTypeVar:
         """Given a SlimsBaseModel object, add it to SLIMS
         Args

@@ -5,7 +5,6 @@ import os
 import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
-from copy import deepcopy
 from datetime import datetime
 
 from slims.internal import Record
@@ -14,16 +13,12 @@ from aind_slims_api.core import SlimsClient
 from aind_slims_api.mouse import (
     SlimsMouseContent,
 )
-from aind_slims_api.user import (
-    SlimsUser
-)
-from aind_slims_api.instrument import (
-    SlimsInstrument
-)
+from aind_slims_api.user import SlimsUser
+from aind_slims_api.instrument import SlimsInstrument
 from aind_slims_api.behavior_session import (
     fetch_behavior_session_content_events,
     write_behavior_session_content_events,
-    SlimsBehaviorSessionContentEvent
+    SlimsBehaviorSessionContentEvent,
 )
 
 RESOURCES_DIR = Path(os.path.dirname(os.path.realpath(__file__))) / "resources"
@@ -51,22 +46,23 @@ class TestBehaviorSession(unittest.TestCase):
             Record(json_entity=r, slims_api=cls.example_client.db.slims_api)
             for r in json.loads(
                 (
-                    RESOURCES_DIR /
-                    "example_fetch_behavior_session_content_events_response.json_entity.json"
+                    RESOURCES_DIR
+                    / (
+                        "example_fetch_behavior_session_content_events_response"
+                        ".json_entity.json"
+                    )
                 ).read_text()
             )
         ]
         cls.example_mouse_response = [
             Record(json_entity=r, slims_api=cls.example_client.db.slims_api)
             for r in json.loads(
-                (
-                    RESOURCES_DIR /
-                    "example_fetch_mouse_response.json"
-                ).read_text()
+                (RESOURCES_DIR / "example_fetch_mouse_response.json").read_text()
             )
         ]
-        assert len(cls.example_response) > 1, \
-            "Example response must be greater than 1 for tests to work..."
+        assert (
+            len(cls.example_response) > 1
+        ), "Example response must be greater than 1 for tests to work..."
 
         cls.example_instrument = SlimsInstrument(
             nstr_name="323_EPHYS1_OPTO",
@@ -95,39 +91,42 @@ class TestBehaviorSession(unittest.TestCase):
             Record(json_entity=r, slims_api=cls.example_client.db.slims_api)
             for r in json.loads(
                 (
-                    RESOURCES_DIR /
-                    "example_write_behavior_session_content_events_response.json_entity.json"
+                    RESOURCES_DIR
+                    / (
+                        "example_write_behavior_session_content_events_response."
+                        "json_entity.json"
+                    )
                 ).read_text()
             )
         ][0]
 
     @patch("slims.slims.Slims.fetch")
-    def test_fetch_behavior_session_content_events_success(
-        self,
-        mock_fetch: MagicMock
-    ):
+    def test_fetch_behavior_session_content_events_success(self, mock_fetch: MagicMock):
         """Test fetch_behavior_session_content_events when successful"""
         mock_fetch.return_value = self.example_response
         validated, unvalidated = fetch_behavior_session_content_events(
-            self.example_client, self.example_mouse)
-        ret_entities = [item.json_entity for item in validated] + \
-            [item["json_entity"] for item in unvalidated]
+            self.example_client, self.example_mouse
+        )
+        ret_entities = [item.json_entity for item in validated] + [
+            item["json_entity"] for item in unvalidated
+        ]
         self.assertEqual(
             [item.json_entity for item in self.example_response],
             ret_entities,
         )
-    
+
     @patch("slims.slims.Slims.fetch")
     def test_fetch_behavior_session_content_events_success_unvalidated(
-        self,
-        mock_fetch: MagicMock
+        self, mock_fetch: MagicMock
     ):
         """Test fetch_behavior_session_content_events when successful"""
         mock_fetch.return_value = self.example_response
         validated, unvalidated = fetch_behavior_session_content_events(
-            self.example_client, self.example_mouse_response[0].json_entity)
-        ret_entities = [item.json_entity for item in validated] + \
-            [item["json_entity"] for item in unvalidated]
+            self.example_client, self.example_mouse_response[0].json_entity
+        )
+        ret_entities = [item.json_entity for item in validated] + [
+            item["json_entity"] for item in unvalidated
+        ]
         self.assertEqual(
             [item.json_entity for item in self.example_response],
             ret_entities,
@@ -135,18 +134,16 @@ class TestBehaviorSession(unittest.TestCase):
 
     @patch("slims.slims.Slims.fetch")
     def test_fetch_behavior_session_content_events_failure_none(
-        self,
-        mock_fetch: MagicMock
+        self, mock_fetch: MagicMock
     ):
         """Test fetch_behavior_session_content_events when supplied with None"""
         mock_fetch.return_value = self.example_response
         with self.assertRaises(ValueError):
             fetch_behavior_session_content_events(self.example_client, None)
-    
+
     @patch("slims.slims.Slims.fetch")
     def test_fetch_behavior_session_content_events_failure_bad_value(
-        self,
-        mock_fetch: MagicMock
+        self, mock_fetch: MagicMock
     ):
         """Test fetch_behavior_session_content_events when supplied with None"""
         mock_fetch.return_value = self.example_response

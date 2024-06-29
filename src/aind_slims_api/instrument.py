@@ -57,7 +57,8 @@ def fetch_instrument_content(
             unvalidated_details = unvalidated[0]
             if len(unvalidated) > 1:
                 logger.warning(
-                    f"Warning, Multiple instruments in SLIMS with name {instrument_name}, "
+                    "Warning, Multiple instruments in SLIMS with name "
+                    f"{instrument_name}, "
                     f"using pk={unvalidated_details['pk']}"
                 )
             return unvalidated[0]

@@ -1,16 +1,12 @@
 """Contains a model for the mouse content, and a method for fetching it"""
 
 import logging
-from typing import Any, Callable
+from typing import Any
 from datetime import datetime
 
-from pydantic import Field, ValidationError
+from pydantic import Field
 
-from aind_slims_api.core import SlimsBaseModel, SlimsClient, SLIMSTABLES, \
-    SlimsBaseModelTypeVar
-from aind_slims_api.mouse import fetch_mouse_content, SlimsMouseContent
-from aind_slims_api.user import fetch_user, SlimsUser
-from aind_slims_api.instrument import fetch_instrument_content, SlimsInstrument
+from aind_slims_api.core import SlimsBaseModel, SlimsClient, SLIMSTABLES
 
 logger = logging.getLogger()
 
@@ -20,20 +16,20 @@ class SlimsBehaviorSessionContentEvent(SlimsBaseModel):
 
     pk: int | None = Field(default=None, alias="cnvn_pk")
     mouse_name: int | None = Field(
-        default=None, alias="cnvn_fk_content")  # used as reference to mouse
+        default=None, alias="cnvn_fk_content"
+    )  # used as reference to mouse
     notes: str | None = Field(default=None, alias="cnvn_cf_notes")
     task_stage: str | None = Field(default=None, alias="cnvn_cf_taskStage")
-    instrument: int | None = Field(
-        default=None, alias="cnvn_cf_fk_instrument")
-    trainers: list[int] = Field(
-        default=[], alias="cnvn_cf_fk_trainer")
+    instrument: int | None = Field(default=None, alias="cnvn_cf_fk_instrument")
+    trainers: list[int] = Field(default=[], alias="cnvn_cf_fk_trainer")
     task: str | None = Field(default=None, alias="cnvn_cf_task")
     is_curriculum_suggestion: bool | None = Field(
-        default=None, alias="cnvn_cf_stageIsOnCurriculum")
+        default=None, alias="cnvn_cf_stageIsOnCurriculum"
+    )
     task_schema_version: str | None = Field(
-        default=None, alias="cnvn_cf_taskSchemaVersion")
-    software_version: str | None = Field(
-        default=None, alias="cnvn_cf_softwareVersion")
+        default=None, alias="cnvn_cf_taskSchemaVersion"
+    )
+    software_version: str | None = Field(default=None, alias="cnvn_cf_softwareVersion")
     date: datetime | None = Field(..., alias="cnvn_cf_scheduledDate")
 
     cnvn_fk_contentEventType: int = 10  # pk of Behavior Session ContentEvent
@@ -63,13 +59,9 @@ def _resolve_pk(
     elif isinstance(model, SlimsBaseModel):
         return getattr(model, primary_key_name)
     elif model is None:
-        raise ValueError(
-            f"Cannot resolve primary key from {model}"
-        )
+        raise ValueError(f"Cannot resolve primary key from {model}")
     else:
-        raise ValueError(
-            "Unexpected type for model: %s" % type(model)
-        )
+        raise ValueError("Unexpected type for model: %s" % type(model))
 
 
 def fetch_behavior_session_content_events(
