@@ -3,6 +3,7 @@
 import json
 import os
 import unittest
+from copy import deepcopy
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -38,18 +39,23 @@ class TestInstrument(unittest.TestCase):
             )
         ]
 
+    @patch("logging.Logger.warning")
     @patch("slims.slims.Slims.fetch")
     def test_fetch_content_success(
         self,
-        mock_fetch: MagicMock
+        mock_fetch: MagicMock,
+        mock_log_warn: MagicMock,
     ):
-        """Test fetch_instrument_content when successful"""
-        mock_fetch.return_value = self.example_response
+        """Test fetch_instrument_content when successful and multiple are
+         returned from fetch
+        """
+        mock_fetch.return_value = self.example_response + self.example_response
         response = fetch_instrument_content(
             self.example_client, "323_EPHYS1_OPTO")
         self.assertEqual(
             response.json_entity, self.example_response[0].json_entity
         )
+        self.assertTrue(mock_log_warn.called)
 
     @patch("slims.slims.Slims.fetch")
     def test_fetch_fail(
@@ -62,6 +68,21 @@ class TestInstrument(unittest.TestCase):
             self.example_client,
             "Hopefully not a valid instrument name right?")
         self.assertTrue(response is None)
+
+    @patch("slims.slims.Slims.fetch")
+    def test_fetch_unvalidated_success(
+        self, mock_fetch: MagicMock,
+    ):
+        """Test fetch_instrument_content when unvalidated instrument data
+         returned.
+        """
+        bad_return = deepcopy(self.example_response[0])
+        bad_return.nstr_pk.value = "burrito"
+        mock_fetch.return_value = [bad_return, bad_return]
+        response = fetch_instrument_content(
+            self.example_client,
+            "323_EPHYS1_OPTO")
+        self.assertTrue(isinstance(response, dict))
 
 
 if __name__ == "__main__":

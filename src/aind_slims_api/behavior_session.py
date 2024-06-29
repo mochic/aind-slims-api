@@ -1,12 +1,13 @@
 """Contains a model for the mouse content, and a method for fetching it"""
 
 import logging
-from typing import Any
+from typing import Any, Callable
 from datetime import datetime
 
 from pydantic import Field, ValidationError
 
-from aind_slims_api.core import SlimsBaseModel, SlimsClient, SLIMSTABLES
+from aind_slims_api.core import SlimsBaseModel, SlimsClient, SLIMSTABLES, \
+    SlimsBaseModelTypeVar
 from aind_slims_api.mouse import fetch_mouse_content, SlimsMouseContent
 from aind_slims_api.user import fetch_user, SlimsUser
 from aind_slims_api.instrument import fetch_instrument_content, SlimsInstrument
@@ -40,35 +41,40 @@ class SlimsBehaviorSessionContentEvent(SlimsBaseModel):
     _slims_table: SLIMSTABLES = "ContentEvent"
 
 
-def _fetch_mouse_pk(
-    client: SlimsClient,
-    mouse_name: str,
-) -> int | None:
+SlimsSingletonFetchReturn = SlimsBaseModel | dict[str, Any] | None
+
+
+def _resolve_pk(
+    model: SlimsSingletonFetchReturn,
+    primary_key_name: str = "pk",
+) -> int:
     """Utility function shared across read/write
 
     Notes
     -----
     - TODO: Change return type of fetch_mouse_content to match pattern in
      fetch_behavior_session_content_events, or the other way around?
+    - TODO: Move to core to have better centralized control of when references
+     are resolved
     """
-    mouse = fetch_mouse_content(client, mouse_name)
-    if isinstance(mouse, dict):
-        return mouse["pk"]
-    elif isinstance(mouse, SlimsMouseContent):
-        return mouse.pk
-    elif mouse is None:
-        logger.warning(f"No mouse found with name {mouse_name}")
-        return None
+    if isinstance(model, dict):
+        logger.warning("Extracting primary key from unvalidated dict.")
+        return model[primary_key_name]
+    elif isinstance(model, SlimsBaseModel):
+        return getattr(model, primary_key_name)
+    elif model is None:
+        raise ValueError(
+            f"Cannot resolve primary key from {model}"
+        )
     else:
         raise ValueError(
-            "Unexpected return type from fetch_mouse_content: %s"
-            % type(mouse)
+            "Unexpected type for model: %s" % type(model)
         )
 
 
 def fetch_behavior_session_content_events(
     client: SlimsClient,
-    mouse_name: str,
+    mouse: SlimsSingletonFetchReturn,
 ) -> tuple[list[SlimsBehaviorSessionContentEvent], list[dict[str, Any]]]:
     """Fetches behavior sessions for a mouse with labtracks id {mouse_name}
 
@@ -80,14 +86,9 @@ def fetch_behavior_session_content_events(
         list:
             Dictionaries representations of objects that failed validation
     """
-    mouse_pk = _fetch_mouse_pk(client, mouse_name)
-    logger.debug(f"Mouse pk: {mouse_pk}")
-    if mouse_pk is None:
-        return [], []
-
     return client.fetch_models(
         SlimsBehaviorSessionContentEvent,
-        cnvn_fk_content=mouse_pk,
+        cnvn_fk_content=_resolve_pk(mouse),
         cnvt_name="Behavior Session",
         sort=["cnvn_cf_scheduledDate"],
     )
@@ -95,9 +96,9 @@ def fetch_behavior_session_content_events(
 
 def write_behavior_session_content_events(
     client: SlimsClient,
-    mouse_name: str,
-    instrument_name: str,
-    trainer_names: list[str],
+    mouse: SlimsSingletonFetchReturn,
+    instrument: SlimsSingletonFetchReturn,
+    trainers: list[SlimsSingletonFetchReturn],
     *behavior_sessions: SlimsBehaviorSessionContentEvent,
 ) -> list[SlimsBehaviorSessionContentEvent]:
     """Writes behavior sessions for a mouse with labtracks id {mouse_name}
@@ -107,36 +108,12 @@ def write_behavior_session_content_events(
     - All supplied `behavior_sessions` will have their `mouse_name` field set
      to the value supplied as `mouse_name` to this function
     """
-    mouse_pk = _fetch_mouse_pk(client, mouse_name)
+    mouse_pk = _resolve_pk(mouse)
     logger.debug(f"Mouse pk: {mouse_pk}")
-    if mouse_pk is None:
-        raise ValueError(f"No mouse found with name {mouse_name}")
-    instrument = fetch_instrument_content(client, instrument_name)
-    if isinstance(instrument, dict):
-        instrument_pk = instrument["pk"]
-    elif isinstance(instrument, SlimsInstrument):
-        instrument_pk = instrument.pk
-    elif instrument is None:
-        raise ValueError(f"No instrument found with name {instrument_name}")
-    else:
-        raise ValueError(
-            "Unexpected return type from fetch_instrument_content: %s"
-            % type(instrument)
-        )
-    trainer_pks = []
-    for trainer_name in trainer_names:
-        trainer = fetch_user(client, trainer_name)
-        if isinstance(trainer, dict):
-            trainer_pks.append(trainer["pk"])
-        elif isinstance(trainer, SlimsUser):
-            trainer_pks.append(trainer.pk)
-        elif trainer is None:
-            raise ValueError(f"No trainer found with name {trainer_name}")
-        else:
-            raise ValueError(
-                "Unexpected return type from fetch_user: %s"
-                % type(trainer)
-            )
+    instrument_pk = _resolve_pk(instrument)
+    logger.debug(f"Instrument pk: {instrument_pk}")
+    trainer_pks = [_resolve_pk(trainer) for trainer in trainers]
+    logger.debug(f"Trainer pks: {trainer_pks}")
     added = []
     for behavior_session in behavior_sessions:
         updated = behavior_session.model_copy(
@@ -146,13 +123,7 @@ def write_behavior_session_content_events(
                 "trainers": trainer_pks,
             },
         )
-        try:
-            validated = SlimsBehaviorSessionContentEvent.model_validate(
-                updated, from_attributes=True)
-        except ValidationError as e:
-            logger.error(
-                f"SLIMS data validation failed. Skipping write, {repr(e)}")
-            continue
-        added.append(client.add_model(validated))
+        logger.debug(f"Resolved behavior session: {updated}")
+        added.append(client.add_model(updated))
 
     return added

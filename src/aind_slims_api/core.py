@@ -237,7 +237,6 @@ class SlimsClient:
             end=end,
             **kwargs,
         )
-        # print(response)
         validated = []
         unvalidated = []
         for record in response:
