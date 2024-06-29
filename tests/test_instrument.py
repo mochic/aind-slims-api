@@ -5,7 +5,6 @@ import os
 import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
-from copy import deepcopy
 
 from slims.internal import Record
 

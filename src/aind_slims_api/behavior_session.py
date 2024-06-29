@@ -4,11 +4,12 @@ import logging
 from typing import Any
 from datetime import datetime
 
-from pydantic import Field, ValidationError, field_serializer
+from pydantic import Field, ValidationError
 
 from aind_slims_api.core import SlimsBaseModel, SlimsClient, SLIMSTABLES
 from aind_slims_api.mouse import fetch_mouse_content, SlimsMouseContent
-from aind_slims_api.user import fetch_user
+from aind_slims_api.user import fetch_user, SlimsUser
+from aind_slims_api.instrument import fetch_instrument_content, SlimsInstrument
 
 logger = logging.getLogger()
 
@@ -16,21 +17,25 @@ logger = logging.getLogger()
 class SlimsBehaviorSessionContentEvent(SlimsBaseModel):
     """Model for an instance of the Behavior Session ContentEvent"""
 
-    pk: int = Field(..., alias="cnvn_pk")
-    mouse_name: int | None = Field(default=None, alias="cnvn_fk_content")  # used as reference to mouse
-    notes: str = Field(..., alias="cnvn_cf_notes")
-    task_stage: str = Field(..., alias="cnvn_cf_taskStage")
-    instrument: int = Field(..., alias="cnvn_cf_fk_instrument")  # TODO: Check if we want to use str for this, Dynamic Choice
-    trainer: list[int] = Field(..., alias="cnvn_cf_fk_trainer")  # TODO: Check if we want to use str for this, Dynamic Choice
-    task: str = Field(..., alias="cnvn_cf_task")
-    is_curriculum_suggestion: bool = Field(
-        ..., alias="cnvn_cf_stageIsOnCurriculum")
-    task_version: str = Field(..., alias="cnvn_cf_taskSchemaVersion")
+    pk: int | None = Field(default=None, alias="cnvn_pk")
+    mouse_name: int | None = Field(
+        default=None, alias="cnvn_fk_content")  # used as reference to mouse
+    notes: str | None = Field(default=None, alias="cnvn_cf_notes")
+    task_stage: str | None = Field(default=None, alias="cnvn_cf_taskStage")
+    instrument: int | None = Field(
+        default=None, alias="cnvn_cf_fk_instrument")
+    trainers: list[int] = Field(
+        default=[], alias="cnvn_cf_fk_trainer")
+    task: str | None = Field(default=None, alias="cnvn_cf_task")
+    is_curriculum_suggestion: bool | None = Field(
+        default=None, alias="cnvn_cf_stageIsOnCurriculum")
+    task_schema_version: str | None = Field(
+        default=None, alias="cnvn_cf_taskSchemaVersion")
     software_version: str | None = Field(
         default=None, alias="cnvn_cf_softwareVersion")
-    date: datetime = Field(..., alias="cnvn_cf_scheduledDate")
+    date: datetime | None = Field(..., alias="cnvn_cf_scheduledDate")
 
-    cnvn_fk_contentEventType: int = 10
+    cnvn_fk_contentEventType: int = 10  # pk of Behavior Session ContentEvent
 
     _slims_table: SLIMSTABLES = "ContentEvent"
 
@@ -75,43 +80,11 @@ def fetch_behavior_session_content_events(
         list:
             Dictionaries representations of objects that failed validation
     """
-    # mouse = fetch_mouse_content(client, mouse_name)
-    # print(mouse.model_dump().keys())
     mouse_pk = _fetch_mouse_pk(client, mouse_name)
     logger.debug(f"Mouse pk: {mouse_pk}")
     if mouse_pk is None:
         return [], []
-    
-    # response = client.fetch(
-    #     "ContentEvent",
-    #     cnvt_name="Behavior Session",
-    #     cnvn_fk_content=mouse.pk,
-    # )
-    # print(len(response))
-    # import json
-    # import pathlib
-    # pathlib.Path("temp.json").write_text(json.dumps([r.json_entity for r in response]))
-    # # print(dir(response[1]))
-    # # print(response[1].cnvt_name.value)
-    # # return
-    # # for attr in dir(response[1]):
-    # #     if attr.startswith("cn"):
-    # #         print(attr)
-    # #         print(f"{attr}: {getattr(response[0], attr).value}")
-    # # return
-    # # print([
-    # #     item.cnvn_fk_contentEventType
-    # #     for item in response
-    # # ])
-    # # response = client.fetch(
-    # #     "ContentEvent",
-    # #     cnvn_fk_content_type="cnvt_behavior_session",
-    # #     cnvn_fk_content=mouse.pk,
-    # # )
 
-    # # print(len(response))
-    # # print(dir(response[1]))
-    # # print(mouse.barcode)
     return client.fetch_models(
         SlimsBehaviorSessionContentEvent,
         cnvn_fk_content=mouse_pk,
@@ -138,13 +111,44 @@ def write_behavior_session_content_events(
     logger.debug(f"Mouse pk: {mouse_pk}")
     if mouse_pk is None:
         raise ValueError(f"No mouse found with name {mouse_name}")
-
+    instrument = fetch_instrument_content(client, instrument_name)
+    if isinstance(instrument, dict):
+        instrument_pk = instrument["pk"]
+    elif isinstance(instrument, SlimsInstrument):
+        instrument_pk = instrument.pk
+    elif instrument is None:
+        raise ValueError(f"No instrument found with name {instrument_name}")
+    else:
+        raise ValueError(
+            "Unexpected return type from fetch_instrument_content: %s"
+            % type(instrument)
+        )
+    trainer_pks = []
+    for trainer_name in trainer_names:
+        trainer = fetch_user(client, trainer_name)
+        if isinstance(trainer, dict):
+            trainer_pks.append(trainer["pk"])
+        elif isinstance(trainer, SlimsUser):
+            trainer_pks.append(trainer.pk)
+        elif trainer is None:
+            raise ValueError(f"No trainer found with name {trainer_name}")
+        else:
+            raise ValueError(
+                "Unexpected return type from fetch_user: %s"
+                % type(trainer)
+            )
     added = []
     for behavior_session in behavior_sessions:
         updated = behavior_session.model_copy(
-            update={"mouse_name": mouse_pk})
+            update={
+                "mouse_name": mouse_pk,
+                "instrument": instrument_pk,
+                "trainers": trainer_pks,
+            },
+        )
         try:
-            validated = SlimsBehaviorSessionContentEvent.model_validate(updated)
+            validated = SlimsBehaviorSessionContentEvent.model_validate(
+                updated, from_attributes=True)
         except ValidationError as e:
             logger.error(
                 f"SLIMS data validation failed. Skipping write, {repr(e)}")
@@ -152,38 +156,3 @@ def write_behavior_session_content_events(
         added.append(client.add_model(validated))
 
     return added
-
-
-if __name__ == "__main__":
-    import os
-    logger.setLevel(logging.DEBUG)
-    client = SlimsClient(
-        username=os.getenv("SLIMS_USERNAME"),
-        password=os.getenv("SLIMS_PASSWORD"),
-    )
-    ret = fetch_behavior_session_content_events(
-        client,
-        mouse_name="00000000",
-    )
-    response = client.fetch(
-        "Instrument",
-    )
-    print(response[0].pk())
-    # raise Exception("bur")
-    # print(ret)
-    # print(fetch_user(client, "ClarkR"))
-    write_behavior_session_content_events(
-        client,
-        "00000000",
-        SlimsBehaviorSessionContentEvent(
-            cnvn_cf_notes="Test",
-            cnvn_cf_taskStage="Test",
-            cnvn_cf_fk_instrument=1743,
-            cnvn_cf_fk_trainer=[19],
-            cnvn_cf_task="Test",
-            cnvn_cf_stageIsOnCurriculum=True,
-            cnvn_cf_taskSchemaVersion="Test",
-            cnvn_cf_softwareVersion="Test",
-            cnvn_cf_scheduledDate=datetime(2021, 1, 1),
-        ),
-    )

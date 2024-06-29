@@ -237,7 +237,7 @@ class SlimsClient:
             end=end,
             **kwargs,
         )
-        print(response)
+        # print(response)
         validated = []
         unvalidated = []
         for record in response:
@@ -304,15 +304,6 @@ class SlimsClient:
         fields_to_include = set(args) or None
         fields_to_exclude = set(kwargs.get("exclude", []))
         fields_to_exclude.add("pk")
-        import json
-        import pathlib
-        # dumped = model.model_dump_json(
-        #     include=fields_to_include,
-        #     exclude=fields_to_exclude,
-        #     **kwargs,
-        #     by_alias=True,
-        # )
-        # pathlib.Path("temp.json").write_text(dumped)
         rtn = self.add(
             model._slims_table,
             model.model_dump(
@@ -322,7 +313,6 @@ class SlimsClient:
                 by_alias=True,
             ),
         )
-        pathlib.Path("temp.json").write_text(json.dumps(rtn.json_entity))
         return type(model).model_validate(rtn)
 
     def update_model(self, model: SlimsBaseModel, *args, **kwargs):

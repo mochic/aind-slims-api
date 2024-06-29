@@ -6,10 +6,20 @@ import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 from copy import deepcopy
+from datetime import datetime
 
 from slims.internal import Record
 
 from aind_slims_api.core import SlimsClient
+from aind_slims_api.mouse import (
+    SlimsMouseContent,
+)
+from aind_slims_api.user import (
+    SlimsUser
+)
+from aind_slims_api.instrument import (
+    SlimsInstrument
+)
 from aind_slims_api.behavior_session import (
     fetch_behavior_session_content_events,
     write_behavior_session_content_events,
@@ -25,6 +35,10 @@ class TestBehaviorSession(unittest.TestCase):
     example_client: SlimsClient
     example_response: list[Record]
     example_behavior_sessions: list[SlimsBehaviorSessionContentEvent]
+    example_mouse: SlimsMouseContent
+    example_write_sessions_response: list[Record]
+    example_instrument: SlimsInstrument
+    example_trainer: SlimsUser
 
     @classmethod
     def setUpClass(cls):
@@ -37,90 +51,142 @@ class TestBehaviorSession(unittest.TestCase):
             for r in json.loads(
                 (
                     RESOURCES_DIR /
-                    "example_fetch_behavior_sessions_response.json"
+                    "example_fetch_behavior_session_content_events_response.json_entity.json"
                 ).read_text()
             )
         ]
         assert len(cls.example_response) > 1, \
             "Example response must be greater than 1 for tests to work..."
+
+        cls.example_instrument = SlimsInstrument(
+            nstr_name="323_EPHYS1_OPTO",
+            nstr_pk=1,
+        )
+        cls.example_trainer = SlimsUser(
+            user_userName="ClarkR",
+            user_pk=1,
+        )
+        cls.example_mouse = SlimsMouseContent(
+            cntn_barCode="00000000",
+            cntn_pk=1,
+            cntn_cf_waterRestricted=False,
+            cntn_cf_scientificPointOfContact=None,
+            cntn_cf_baselineWeight=None,
+        )
         cls.example_behavior_sessions = [
             SlimsBehaviorSessionContentEvent(
-                notes="Test notes",
-                task_stage="Test stage",
-                instrument="Test instrument",
-                trainer="Test trainer",
-                task="Test task",
-                date="2021-01-01",
+                cnvn_cf_notes="Test notes",
+                cnvn_cf_taskStage="Test stage",
+                cnvn_cf_task="Test task",
+                cnvn_cf_scheduledDate=datetime(2021, 1, 2),
             ),
-            SlimsBehaviorSessionContentEvent(
-                notes="Test notes",
-                task_stage="Test stage",
-                instrument="Test instrument",
-                trainer="Test trainer",
-                task="Test task",
-                date="2021-01-02",
-            )
         ]
+        cls.example_write_sessions_response = [
+            Record(json_entity=r, slims_api=cls.example_client.db.slims_api)
+            for r in json.loads(
+                (
+                    RESOURCES_DIR /
+                    "example_write_behavior_session_content_events_response.json_entity.json"
+                ).read_text()
+            )
+        ][0]
 
     @patch("slims.slims.Slims.fetch")
+    @patch("aind_slims_api.behavior_session.fetch_mouse_content")
     def test_fetch_behavior_session_content_events_success(
         self,
+        mock_fetch_mouse_content: MagicMock,
         mock_fetch: MagicMock
     ):
         """Test fetch_behavior_session_content_events when successful"""
+        mock_fetch_mouse_content.return_value = self.example_mouse
         mock_fetch.return_value = self.example_response
-        response = fetch_behavior_session_content_events(
+        validated, unvalidated = fetch_behavior_session_content_events(
             self.example_client, mouse_name="123456")
+        ret_entities = [item.json_entity for item in validated] + \
+            [item["json_entity"] for item in unvalidated]
         self.assertEqual(
             [item.json_entity for item in self.example_response],
-            [item.json_entity for item in response],
+            ret_entities,
         )
-        self.assertTrue(response[0].date < response[1].date)
 
     @patch("logging.Logger.error")
+    @patch("aind_slims_api.behavior_session.fetch_mouse_content")
     @patch("slims.slims.Slims.fetch")
     def test_fetch_behavior_session_content_events_validation_fail(
-        self, mock_fetch: MagicMock, mock_log_error: MagicMock
+        self, mock_fetch: MagicMock, mock_fetch_mouse_content: MagicMock,
+        mock_log_error: MagicMock
     ):
-        """Test fetch_behavior_session_content_events when bad values returned"""
+        """Test fetch_behavior_session_content_events when bad values returned
+        """
+        mock_fetch_mouse_content.return_value = self.example_mouse
         wrong_return = deepcopy(self.example_response)
-        wrong_return[0].cnvn_cf_fk_instrument.value = 14
+        wrong_return[0].cnvn_cf_fk_instrument.value = "burrito"
         mock_fetch.return_value = wrong_return
         fetch_behavior_session_content_events(
             self.example_client, mouse_name="123456")
         mock_log_error.assert_called()
 
+    @patch("aind_slims_api.behavior_session.fetch_user")
+    @patch("aind_slims_api.behavior_session.fetch_instrument_content")
+    @patch("aind_slims_api.behavior_session.fetch_mouse_content")
     @patch("slims.slims.Slims.add")
     def test_write_behavior_session_content_events_success(
-        self, mock_add: MagicMock,
+        self,
+        mock_add: MagicMock,
+        mock_fetch_mouse_content: MagicMock,
+        mock_fetch_instrument_content: MagicMock,
+        mock_fetch_user: MagicMock,
     ):
         """Test write_behavior_session_content_events success"""
-        mock_add.return_value = self.example_response
-        mouse_name = "123456"
+        mouse_name = "00000000"
+        mock_fetch_mouse_content.return_value = self.example_mouse
+        mock_fetch_instrument_content.return_value = self.example_instrument
+        mock_fetch_user.return_value = self.example_trainer
+        mock_add.return_value = self.example_write_sessions_response
         added = write_behavior_session_content_events(
             self.example_client,
-            mouse_name=mouse_name,
+            mouse_name,
+            self.example_instrument.name,
+            [self.example_trainer.username],
             *self.example_behavior_sessions,
         )
         self.assertTrue(
-            all((item.mouse_name == mouse_name for item in added))
+            all((item.mouse_name == self.example_mouse.pk for item in added))
         )
         self.assertTrue(len(added) == len(self.example_behavior_sessions))
 
+    # @patch("aind_slims_api.behavior_session.SlimsBehaviorSessionContentEvent.model_validate")
+    @patch("aind_slims_api.behavior_session.fetch_user")
+    @patch("aind_slims_api.behavior_session.fetch_instrument_content")
+    @patch("aind_slims_api.behavior_session.fetch_mouse_content")
     @patch("logging.Logger.error")
     @patch("slims.slims.Slims.add")
     def test_write_behavior_session_content_events_validation_fail(
-        self, mock_add: MagicMock, mock_log_error: MagicMock
+        self,
+        mock_add: MagicMock,
+        mock_log_error: MagicMock,
+        mock_fetch_mouse_content: MagicMock,
+        mock_fetch_instrument_content: MagicMock,
+        mock_fetch_user: MagicMock,
+        # mock_model_validate: MagicMock,
     ):
         """Test write_behavior_session_content_events when bad values"""
-        mock_add.return_value = None
-        bad_behavior_sessions = deepcopy(self.example_behavior_sessions)
-        bad_behavior_sessions[0].cnvn_cf_fk_instrument.value = 14
+        mouse_name = "00000000"
+        mock_fetch_mouse_content.return_value = self.example_mouse
+        bad_instrument = deepcopy(self.example_instrument)
+        bad_instrument = bad_instrument.model_copy(update={"pk": "burrito"})
+        mock_fetch_instrument_content.return_value = bad_instrument
+        mock_fetch_user.return_value = self.example_trainer
+        mock_add.return_value = self.example_write_sessions_response
         added = write_behavior_session_content_events(
-            self.example_client, mouse_name="123456")
-        self.assertTrue(
-            (len(bad_behavior_sessions) - 1) == len(added)
+            self.example_client,
+            mouse_name,
+            self.example_instrument.name,
+            [self.example_trainer.username],
+            *self.example_behavior_sessions,
         )
+        self.assertTrue(len(added) == 0)
         mock_log_error.assert_called()
 
 
