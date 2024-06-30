@@ -96,11 +96,6 @@ class SlimsBaseModel(
     def _validate(cls, value, info: ValidationInfo):
         """Validates a field, accounts for Quantities"""
         if isinstance(value, SlimsColumn):
-            # if value.name == "pk":
-            #     raise Exception("Bur")
-            # print(value.name)
-            # print(type(value))
-            # print(dir(value))
             if value.datatype == "QUANTITY":
                 unit_spec = _find_unit_spec(cls.model_fields[info.field_name])
                 if unit_spec is None:

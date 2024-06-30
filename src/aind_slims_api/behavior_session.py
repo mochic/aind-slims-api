@@ -1,4 +1,6 @@
-"""Contains a model for the mouse content, and a method for fetching it"""
+"""Contains a model for the behavior session content events, a method for
+ fetching it and writing it.
+"""
 
 import logging
 from typing import Any

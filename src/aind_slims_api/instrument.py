@@ -1,4 +1,4 @@
-"""Contains a model for the mouse content, and a method for fetching it"""
+"""Contains a model for the instrument content, and a method for fetching it"""
 
 import logging
 from typing import Any
