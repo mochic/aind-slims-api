@@ -17,7 +17,7 @@ class SlimsBehaviorSessionContentEvent(SlimsBaseModel):
     """Model for an instance of the Behavior Session ContentEvent"""
 
     pk: int | None = Field(default=None, alias="cnvn_pk")
-    mouse_name: int | None = Field(
+    mouse_pk: int | None = Field(
         default=None, alias="cnvn_fk_content"
     )  # used as reference to mouse
     notes: str | None = Field(default=None, alias="cnvn_cf_notes")
@@ -112,7 +112,7 @@ def write_behavior_session_content_events(
     for behavior_session in behavior_sessions:
         updated = behavior_session.model_copy(
             update={
-                "mouse_name": mouse_pk,
+                "mouse_pk": mouse_pk,
                 "instrument": instrument_pk,
                 "trainers": trainer_pks,
             },

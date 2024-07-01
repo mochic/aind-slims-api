@@ -165,7 +165,7 @@ class TestBehaviorSession(unittest.TestCase):
             *self.example_behavior_sessions,
         )
         self.assertTrue(
-            all((item.mouse_name == self.example_mouse.pk for item in added))
+            all((item.mouse_pk == self.example_mouse.pk for item in added))
         )
         self.assertTrue(len(added) == len(self.example_behavior_sessions))
 
