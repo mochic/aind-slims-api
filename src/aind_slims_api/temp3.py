@@ -8,12 +8,14 @@ client = SlimsClient()
 
 criteria = conjunction()
 criteria.add(
-    equals("rdrc_name", "323_EPHYS1_OPTO_20240212")
+    equals("nstr_name", "323_EPHYS1_OPTO")
 )
 records = client.db.fetch(
-    "ReferenceDataRecord",
+    "Instrument",
     criteria=criteria,
 )
+print(dir(records[0]))
+print(records[0].attachments())
 attachments = records[0].attachments()
 for link_d in attachments[0].json_entity["links"]:
     if link_d["rel"] == "contents":

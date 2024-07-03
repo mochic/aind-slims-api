@@ -43,6 +43,8 @@ SLIMSTABLES = Literal[
     "User",
     "Groups",
     "Instrument",
+    "ReferenceDataRecord",
+    "ReferenceDataRecordAttachment",
 ]
 
 
