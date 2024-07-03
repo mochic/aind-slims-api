@@ -36,7 +36,7 @@
         "name": "nstr_description",
         "title": "Description",
         "position": 3,
-        "value": "<p>EPHYS1 Rig configuration for opto experiments</p>\n\n<p>Main User: Anna Lakunina</p>\n",
+        "value": "<p>EPHYS1 Rig configuration for opto experiments</p>\n\n<p>Main User: Burt Rappapor</p>\n",
         "hidden": false,
         "editable": true
       },
