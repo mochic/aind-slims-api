@@ -1,0 +1,350 @@
+{
+  "canDelete": true,
+  "canUpdate": true,
+  "columns": [
+    {
+      "datatype": "STRING",
+      "editable": true,
+      "hidden": false,
+      "name": "rdrc_name",
+      "position": 0,
+      "title": "Name",
+      "value": "323_EPHYS1_OPTO_20240212"
+    },
+    {
+      "datatype": "STRING",
+      "editable": true,
+      "hidden": false,
+      "name": "rdrc_uniqueIdentifier",
+      "position": 1,
+      "title": "Unique identifier",
+      "value": "rdrc_instrument_json_323_ephys1_opto_2024_02_12"
+    },
+    {
+      "datatype": "BOOLEAN",
+      "editable": true,
+      "hidden": false,
+      "name": "rdrc_active",
+      "position": 2,
+      "title": "Active",
+      "value": true
+    },
+    {
+      "datatype": "FOREIGN_KEY",
+      "displayField": "user_userName",
+      "displayValue": null,
+      "editable": true,
+      "foreignDisplayColumn": "user_userName",
+      "foreignTable": "User",
+      "hidden": false,
+      "name": "rdrc_fk_user",
+      "position": 3,
+      "title": "User",
+      "value": null
+    },
+    {
+      "datatype": "FOREIGN_KEY",
+      "displayField": "grps_groupName",
+      "displayValue": null,
+      "editable": true,
+      "foreignDisplayColumn": "grps_groupName",
+      "foreignTable": "Groups",
+      "hidden": false,
+      "name": "rdrc_fk_group",
+      "position": 4,
+      "title": "Group",
+      "value": null
+    },
+    {
+      "datatype": "FOREIGN_KEY",
+      "displayField": "rdrc_cf_fk_rigInstrument_display",
+      "displayValue": "323_EPHYS1_OPTO",
+      "editable": true,
+      "foreignDisplayColumn": "nstr_name",
+      "foreignTable": "Instrument",
+      "hidden": false,
+      "name": "rdrc_cf_fk_rigInstrument",
+      "position": 5,
+      "title": "Instrument",
+      "value": 4
+    },
+    {
+      "datatype": "FOREIGN_KEY",
+      "displayField": "attm_name",
+      "displayValue": "rig323_EPHYS1_OPTO_2024-02-12.json",
+      "editable": true,
+      "foreignDisplayColumn": "attm_name",
+      "foreignTable": "Attachment",
+      "hidden": false,
+      "name": "rdrc_cf_jsonAttachment",
+      "position": 6,
+      "title": "JSON Attachment",
+      "value": 21
+    },
+    {
+      "datatype": "FOREIGN_KEY",
+      "displayField": "rdty_name",
+      "displayValue": "AIND Instruments",
+      "editable": false,
+      "foreignDisplayColumn": "rdty_name",
+      "foreignTable": "ReferenceDataType",
+      "hidden": false,
+      "name": "rdrc_fk_referenceDataType",
+      "position": 7,
+      "title": "Reference Data Type",
+      "value": 33
+    },
+    {
+      "datatype": "STRING",
+      "editable": true,
+      "hidden": false,
+      "name": "rdrc_createdBy",
+      "position": 8,
+      "title": "Created by",
+      "value": "LKim"
+    },
+    {
+      "datatype": "DATE",
+      "dateFormat": "MM/dd/yyyy HH:mm:ss",
+      "editable": true,
+      "hidden": false,
+      "name": "rdrc_createdOn",
+      "position": 9,
+      "subType": "datetime",
+      "timeZone": "America/Los_Angeles",
+      "title": "Created on",
+      "value": 1711642574300
+    },
+    {
+      "datatype": "STRING",
+      "editable": true,
+      "hidden": false,
+      "name": "rdrc_modifiedBy",
+      "position": 10,
+      "title": "Modified by",
+      "value": "LKim"
+    },
+    {
+      "datatype": "DATE",
+      "dateFormat": "MM/dd/yyyy HH:mm:ss",
+      "editable": true,
+      "hidden": false,
+      "name": "rdrc_modifiedOn",
+      "position": 11,
+      "subType": "datetime",
+      "timeZone": "America/Los_Angeles",
+      "title": "Modified on",
+      "value": 1714510031296
+    },
+    {
+      "datatype": "INTEGER",
+      "editable": true,
+      "hidden": true,
+      "name": "attachmentCount",
+      "position": 12,
+      "title": "attachmentCount",
+      "value": 1
+    },
+    {
+      "datatype": "INTEGER",
+      "editable": true,
+      "hidden": true,
+      "name": "rdrc_pk",
+      "position": 13,
+      "title": "rdrc_pk",
+      "value": 1743
+    }
+  ],
+  "links": [
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/ReferenceDataRecord/1743",
+      "rel": "self"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/Instrument/4",
+      "rel": "rdrc_cf_fk_rigInstrument"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/ReferenceDataType/33",
+      "rel": "rdrc_fk_referenceDataType"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/RuleReferenceDataRecord?rlrr_fk_referenceDataRecord=1743",
+      "rel": "-rlrr_fk_referenceDataRecord"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/Product?prdc_cf_fk_stringParameters=1743",
+      "rel": "-prdc_cf_fk_stringParameters"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/ContentEvent?cnvn_cf_fk_instrument=1743",
+      "rel": "-cnvn_cf_fk_instrument"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/ReferenceDataRecord?rdrc_cf_fk_manufacturer=1743",
+      "rel": "-rdrc_cf_fk_manufacturer"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/ReferenceDataRecord?rdrc_cf_fk_storageTemp=1743",
+      "rel": "-rdrc_cf_fk_storageTemp"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/ReferenceDataRecord?rdrc_cf_fk_hcrSeriesName=1743",
+      "rel": "-rdrc_cf_fk_hcrSeriesName"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/ReferenceDataRecord?rdrc_cf_fk_primaryTargetedStructure=1743",
+      "rel": "-rdrc_cf_fk_primaryTargetedStructure"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/ReferenceDataRecord?rdrc_cf_fk_reagents=1743",
+      "rel": "-rdrc_cf_fk_reagents"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/ReferenceDataRecord?rdrc_cf_fk_rewardSpouts=1743",
+      "rel": "-rdrc_cf_fk_rewardSpouts"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/ReferenceDataRecord?rdrc_cf_fk_vendor=1743",
+      "rel": "-rdrc_cf_fk_vendor"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/ReferenceDataRecord?rdrc_cf_fk_secondaryTargetedStructures=1743",
+      "rel": "-rdrc_cf_fk_secondaryTargetedStructures"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/ReferenceDataRecord?rdrc_cf_fk_fiberConnections=1743",
+      "rel": "-rdrc_cf_fk_fiberConnections"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/ExperimentRunStep?xprs_cf_fk_instrumentJson=1743",
+      "rel": "-xprs_cf_fk_instrumentJson"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/ExperimentRunStep?xprs_cf_fk_hcrOperator=1743",
+      "rel": "-xprs_cf_fk_hcrOperator"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/ExperimentRunStep?xprs_cf_fk_hcrPanelToBeUsedInThisRun=1743",
+      "rel": "-xprs_cf_fk_hcrPanelToBeUsedInThisRun"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/ExperimentRunStep?xprs_cf_fk_stimulusEpochs=1743",
+      "rel": "-xprs_cf_fk_stimulusEpochs"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/ExperimentRunStep?xprs_cf_fk_createFiberConnections=1743",
+      "rel": "-xprs_cf_fk_createFiberConnections"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/ExperimentRunStep?xprs_cf_fk_calibrations=1743",
+      "rel": "-xprs_cf_fk_calibrations"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/ExperimentRunStep?xprs_cf_fk_maintenance=1743",
+      "rel": "-xprs_cf_fk_maintenance"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/Result?rslt_cf_fk_targetRegion=1743",
+      "rel": "-rslt_cf_fk_targetRegion"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/Result?rslt_cf_fk_surgeryType=1743",
+      "rel": "-rslt_cf_fk_surgeryType"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/Result?rslt_cf_fk_imagingFluidUsed=1743",
+      "rel": "-rslt_cf_fk_imagingFluidUsed"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/Result?rslt_cf_fk_instrumentJson=1743",
+      "rel": "-rslt_cf_fk_instrumentJson"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/Result?rslt_cf_fk_rewardDelivery=1743",
+      "rel": "-rslt_cf_fk_rewardDelivery"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/Order?ordr_cf_fk_tangentialPlaneSectioningReference=1743",
+      "rel": "-ordr_cf_fk_tangentialPlaneSectioningReference"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/Order?ordr_cf_fk_brainStructure=1743",
+      "rel": "-ordr_cf_fk_brainStructure"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/Order?ordr_cf_fk_hcrPanel=1743",
+      "rel": "-ordr_cf_fk_hcrPanel"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/Order?ordr_cf_fk_desiredAntibody=1743",
+      "rel": "-ordr_cf_fk_desiredAntibody"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/Order?ordr_cf_fk_requestedHcrPanel=1743",
+      "rel": "-ordr_cf_fk_requestedHcrPanel"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/Order?ordr_cf_fk_regionOfInterest=1743",
+      "rel": "-ordr_cf_fk_regionOfInterest"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/Order?ordr_cf_fk_requestedIndexMatchingSolutionType=1743",
+      "rel": "-ordr_cf_fk_requestedIndexMatchingSolutionType"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/Order?ordr_cf_fk_primaryAntibody=1743",
+      "rel": "-ordr_cf_fk_primaryAntibody"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/Order?ordr_cf_fk_secondaryAntibody=1743",
+      "rel": "-ordr_cf_fk_secondaryAntibody"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/Content?cntn_cf_fk_plasmidName=1743",
+      "rel": "-cntn_cf_fk_plasmidName"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/Content?cntn_cf_fk_serotype=1743",
+      "rel": "-cntn_cf_fk_serotype"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/Content?cntn_cf_fk_plasmid=1743",
+      "rel": "-cntn_cf_fk_plasmid"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/Content?cntn_cf_fk_antibodyCatalogInfo=1743",
+      "rel": "-cntn_cf_fk_antibodyCatalogInfo"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/Content?cntn_cf_fk_brainRegion=1743",
+      "rel": "-cntn_cf_fk_brainRegion"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/Content?cntn_cf_fk_ccfStructure=1743",
+      "rel": "-cntn_cf_fk_ccfStructure"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/Content?cntn_cf_fk_fundingCode=1743",
+      "rel": "-cntn_cf_fk_fundingCode"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/Content?cntn_cf_fk_regionOfInterest=1743",
+      "rel": "-cntn_cf_fk_regionOfInterest"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/Content?cntn_cf_fk_requestedIndexMatchingSolutionType=1743",
+      "rel": "-cntn_cf_fk_requestedIndexMatchingSolutionType"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/Content?cntn_cf_fk_tangentialPlaneSectioningReference=1743",
+      "rel": "-cntn_cf_fk_tangentialPlaneSectioningReference"
+    },
+    {
+      "href": "https://aind-test.us.slims.agilent.com/slimsrest/rest/attachment/ReferenceDataRecord/1743",
+      "rel": "attachments"
+    }
+  ],
+  "pk": 1743,
+  "tableName": "ReferenceDataRecord"
+}

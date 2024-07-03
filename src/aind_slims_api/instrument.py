@@ -1,5 +1,5 @@
 """Contains a model for the instrument content, and a method for fetching it"""
-
+import os
 import logging
 from typing import Any
 
@@ -23,8 +23,15 @@ class SlimsInstrument(SlimsBaseModel):
 def fetch_instrument_content(
     client: SlimsClient,
     instrument_name: str,
+    instrument_id: str | None = None,
 ) -> SlimsInstrument | dict[str, Any] | None:
     """Fetches behavior sessions for a mouse with labtracks id {mouse_name}
+
+    Examples
+    --------
+    >>> client = SlimsClient()
+    >>> instrument = fetch_instrument_content(client, "323_EPHYS1_OPTO")
+    >>> fetch_instrument_content(client, "323_EPHYS1_OPTO_20240212", "323_EPHYS1_OPTO_20240212")
 
     Returns
     -------
@@ -40,10 +47,17 @@ def fetch_instrument_content(
     - TODO: reconsider this pattern, consider just returning all records or
      having number returned be a parameter or setting
     """
-    validated, unvalidated = client.fetch_models(
-        SlimsInstrument,
-        nstr_name=instrument_name,
-    )
+    if instrument_id is not None:
+        print("bur")
+        validated, unvalidated = client.fetch_models(
+            SlimsInstrument,
+            rig_id=instrument_id,
+        )
+    else:
+        validated, unvalidated = client.fetch_models(
+            SlimsInstrument,
+            nstr_name=instrument_name,
+        )
     if len(validated) > 0:
         validated_details = validated[0]
         if len(validated) > 1:
@@ -64,3 +78,16 @@ def fetch_instrument_content(
             return unvalidated[0]
 
     return None
+
+
+if __name__ == "__main__":
+    import doctest
+    import dotenv
+    import logging
+    logging.basicConfig(level=logging.DEBUG)
+    dotenv.load_dotenv()
+    doctest.testmod(
+        optionflags=(
+            doctest.IGNORE_EXCEPTION_DETAIL | doctest.NORMALIZE_WHITESPACE
+        )
+    )

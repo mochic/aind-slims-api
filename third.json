@@ -1,0 +1,679 @@
+{
+    "additional_devices": [],
+    "calibrations": [
+        {
+            "calibration_date": "2024-01-18T00:00:00",
+            "description": "Laser power calibration",
+            "device_name": "Red Oxxius Laser",
+            "input": {
+                "voltage (V)": [
+                    0.139,
+                    0.232,
+                    0.325,
+                    0.417,
+                    0.514,
+                    0.607,
+                    0.7,
+                    0.784,
+                    0.874,
+                    0.965,
+                    1.9,
+                    2.905
+                ]
+            },
+            "notes": null,
+            "output": {
+                "power (mW)": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    20,
+                    30
+                ]
+            }
+        },
+        {
+            "calibration_date": "2024-01-18T00:00:00",
+            "description": "Laser power calibration",
+            "device_name": "Blue Oxxius Laser",
+            "input": {
+                "voltage (V)": [
+                    0.247,
+                    0.459,
+                    0.662,
+                    0.863,
+                    1.073,
+                    1.264,
+                    1.455,
+                    1.645,
+                    1.829,
+                    2.024,
+                    3.66,
+                    5
+                ]
+            },
+            "notes": null,
+            "output": {
+                "power (mW)": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    20,
+                    28.9
+                ]
+            }
+        },
+        {
+            "calibration_date": "2024-02-12T00:00:00",
+            "description": "Laser power calibration",
+            "device_name": "Red Coherent Laser",
+            "input": {
+                "voltage (V)": [
+                    0.032,
+                    0.045,
+                    0.135,
+                    0.313,
+                    0.401,
+                    0.837,
+                    1.7,
+                    2.588,
+                    3.405,
+                    5.0
+                ]
+            },
+            "notes": null,
+            "output": {
+                "power (mW)": [
+                    0.4,
+                    1,
+                    2,
+                    4,
+                    5,
+                    10,
+                    20,
+                    30,
+                    40,
+                    58.27
+                ]
+            }
+        }
+    ],
+    "cameras": [
+        {
+            "camera": {
+                "additional_settings": {},
+                "bin_height": null,
+                "bin_mode": "None",
+                "bin_unit": "pixel",
+                "bin_width": null,
+                "bit_depth": null,
+                "chroma": "Monochrome",
+                "computer_name": "W10DT713669",
+                "cooling": null,
+                "crop_height": null,
+                "crop_unit": "pixel",
+                "crop_width": null,
+                "data_interface": "USB",
+                "detector_type": "Camera",
+                "device_type": "Detector",
+                "driver": null,
+                "driver_version": null,
+                "frame_rate_unit": "hertz",
+                "gain": null,
+                "immersion": null,
+                "manufacturer": {
+                    "abbreviation": "FLIR",
+                    "name": "Teledyne FLIR",
+                    "registry": {
+                        "abbreviation": "ROR",
+                        "name": "Research Organization Registry"
+                    },
+                    "registry_identifier": "01j1gwp17"
+                },
+                "max_frame_rate": "522",
+                "model": "Blackfly S BFS-U3-04S2M",
+                "name": "Face Camera",
+                "notes": null,
+                "path_to_cad": null,
+                "port_index": null,
+                "recording_software": null,
+                "sensor_format": "1/2.9",
+                "sensor_format_unit": "inches",
+                "sensor_height": 540,
+                "sensor_width": 720,
+                "serial_number": "23022709",
+                "size_unit": "pixel"
+            },
+            "camera_assembly_name": "Face Camera Assembly",
+            "camera_target": "Face side",
+            "filter": null,
+            "lens": {
+                "additional_settings": {},
+                "device_type": "Lens",
+                "focal_length": "25",
+                "focal_length_unit": "millimeter",
+                "lens_size_unit": "inch",
+                "manufacturer": {
+                    "abbreviation": null,
+                    "name": "Edmund Optics",
+                    "registry": {
+                        "abbreviation": "ROR",
+                        "name": "Research Organization Registry"
+                    },
+                    "registry_identifier": "01j1gwp17"
+                },
+                "max_aperture": "f/1.4",
+                "model": "M2514-MP2",
+                "name": "Camera lens",
+                "notes": null,
+                "optimized_wavelength_range": null,
+                "path_to_cad": null,
+                "port_index": null,
+                "serial_number": null,
+                "size": null,
+                "wavelength_unit": "nanometer"
+            },
+            "position": null
+        }
+    ],
+    "ccf_coordinate_transform": null,
+    "daqs": [
+        {
+            "additional_settings": {},
+            "channels": [
+                {
+                    "channel_index": null,
+                    "channel_name": "DO0",
+                    "channel_type": "Digital Output",
+                    "device_name": "Face Camera",
+                    "event_based_sampling": null,
+                    "port": null,
+                    "sample_rate": null,
+                    "sample_rate_unit": "hertz"
+                }
+            ],
+            "computer_name": "W10DT713669",
+            "core_version": "2.1",
+            "data_interface": "USB",
+            "device_type": "Harp device",
+            "firmware_version": null,
+            "hardware_version": null,
+            "harp_device_type": {
+                "name": "Behavior",
+                "whoami": 1216
+            },
+            "is_clock_generator": false,
+            "manufacturer": {
+                "abbreviation": "OEPS",
+                "name": "Open Ephys Production Site",
+                "registry": {
+                    "abbreviation": "ROR",
+                    "name": "Research Organization Registry"
+                },
+                "registry_identifier": "007rkz355"
+            },
+            "model": null,
+            "name": "Harp Behavior",
+            "notes": null,
+            "path_to_cad": null,
+            "port_index": null,
+            "serial_number": null,
+            "tag_version": null
+        },
+        {
+            "additional_settings": {},
+            "basestation_firmware_version": "2.0168",
+            "bsc_firmware_version": "1.02",
+            "channels": [],
+            "computer_name": "W10DT713668",
+            "data_interface": "PXI",
+            "device_type": "Neuropixels basestation",
+            "firmware_version": null,
+            "hardware_version": null,
+            "manufacturer": {
+                "abbreviation": "IMEC",
+                "name": "Interuniversity Microelectronics Center",
+                "registry": {
+                    "abbreviation": "ROR",
+                    "name": "Research Organization Registry"
+                },
+                "registry_identifier": "02kcbn207"
+            },
+            "model": null,
+            "name": "NPopto Basestation",
+            "notes": null,
+            "path_to_cad": null,
+            "port_index": null,
+            "ports": [
+                {
+                    "index": 1,
+                    "probes": [
+                        "Probe A"
+                    ]
+                }
+            ],
+            "serial_number": null,
+            "slot": 5
+        }
+    ],
+    "describedBy": "https://raw.githubusercontent.com/AllenNeuralDynamics/aind-data-schema/main/src/aind_data_schema/core/rig.py",
+    "detectors": [],
+    "digital_micromirror_devices": [],
+    "enclosure": null,
+    "ephys_assemblies": [
+        {
+            "ephys_assembly_name": "Ephys_assembly_0",
+            "manipulator": {
+                "additional_settings": {},
+                "device_type": "Manipulator",
+                "manufacturer": {
+                    "abbreviation": null,
+                    "name": "New Scale Technologies",
+                    "registry": null,
+                    "registry_identifier": null
+                },
+                "model": null,
+                "name": "45880",
+                "notes": null,
+                "path_to_cad": null,
+                "port_index": null,
+                "serial_number": "33738"
+            },
+            "probes": [
+                {
+                    "additional_settings": {},
+                    "device_type": "Ephys probe",
+                    "headstage": null,
+                    "lasers": [
+                        {
+                            "additional_settings": {},
+                            "coupling": "Single-mode fiber",
+                            "coupling_efficiency": null,
+                            "coupling_efficiency_unit": "percent",
+                            "device_type": "Laser",
+                            "item_number": null,
+                            "manufacturer": {
+                                "abbreviation": null,
+                                "name": "Oxxius",
+                                "registry": null,
+                                "registry_identifier": null
+                            },
+                            "maximum_power": null,
+                            "model": null,
+                            "name": "Oxxius Blue Laser",
+                            "notes": null,
+                            "path_to_cad": null,
+                            "port_index": null,
+                            "power_unit": "milliwatt",
+                            "serial_number": "LAS-08787",
+                            "wavelength": 473,
+                            "wavelength_unit": "nanometer"
+                        },
+                        {
+                            "additional_settings": {},
+                            "coupling": "Single-mode fiber",
+                            "coupling_efficiency": null,
+                            "coupling_efficiency_unit": "percent",
+                            "device_type": "Laser",
+                            "item_number": null,
+                            "manufacturer": {
+                                "abbreviation": null,
+                                "name": "Oxxius",
+                                "registry": null,
+                                "registry_identifier": null
+                            },
+                            "maximum_power": null,
+                            "model": null,
+                            "name": "Oxxius Red Laser",
+                            "notes": null,
+                            "path_to_cad": null,
+                            "port_index": null,
+                            "power_unit": "milliwatt",
+                            "serial_number": "LAS-08677",
+                            "wavelength": 638,
+                            "wavelength_unit": "nanometer"
+                        }
+                    ],
+                    "manufacturer": null,
+                    "model": null,
+                    "name": "Probe A",
+                    "notes": null,
+                    "path_to_cad": null,
+                    "port_index": null,
+                    "probe_model": "Neuropixels Opto (Demonstrator)",
+                    "serial_number": "22112104251"
+                }
+            ]
+        }
+    ],
+    "fiber_assemblies": [],
+    "filters": [],
+    "laser_assemblies": [
+        {
+            "laser_assembly_name": "External 640 laser",
+            "lasers": [
+                {
+                    "additional_settings": {},
+                    "coupling": null,
+                    "coupling_efficiency": null,
+                    "coupling_efficiency_unit": "percent",
+                    "device_type": "Laser",
+                    "item_number": null,
+                    "manufacturer": {
+                        "abbreviation": null,
+                        "name": "Coherent Scientific",
+                        "registry": {
+                            "abbreviation": "ROR",
+                            "name": "Research Organization Registry"
+                        },
+                        "registry_identifier": "031tysd23"
+                    },
+                    "maximum_power": null,
+                    "model": null,
+                    "name": "Coherent Red Laser",
+                    "notes": null,
+                    "path_to_cad": null,
+                    "port_index": null,
+                    "power_unit": "milliwatt",
+                    "serial_number": "M171024016",
+                    "wavelength": 640,
+                    "wavelength_unit": "nanometer"
+                }
+            ],
+            "manipulator": {
+                "additional_settings": {},
+                "device_type": "Manipulator",
+                "manufacturer": {
+                    "abbreviation": null,
+                    "name": "New Scale Technologies",
+                    "registry": null,
+                    "registry_identifier": null
+                },
+                "model": null,
+                "name": "45879",
+                "notes": null,
+                "path_to_cad": null,
+                "port_index": null,
+                "serial_number": "33711"
+            }
+        }
+    ],
+    "lenses": [],
+    "light_sources": [],
+    "modalities": [
+        {
+            "abbreviation": "ecephys",
+            "name": "Extracellular electrophysiology"
+        }
+    ],
+    "modification_date": "2024-02-12",
+    "mouse_platform": {
+        "additional_settings": {},
+        "date_surface_replaced": null,
+        "device_type": "Tube",
+        "diameter": "3.0",
+        "diameter_unit": "centimeter",
+        "manufacturer": null,
+        "model": null,
+        "name": "Tube",
+        "notes": null,
+        "path_to_cad": null,
+        "port_index": null,
+        "serial_number": null,
+        "surface_material": null
+    },
+    "notes": null,
+    "objectives": [],
+    "origin": null,
+    "patch_cords": [],
+    "pockels_cells": [],
+    "polygonal_scanners": [],
+    "rig_axes": [],
+    "rig_id": "323_EPHYS1_OPTO_2024-02-12",
+    "schema_version": "0.2.16",
+    "stick_microscopes": [
+        {
+            "camera": {
+                "additional_settings": {},
+                "bin_height": null,
+                "bin_mode": "None",
+                "bin_unit": "pixel",
+                "bin_width": null,
+                "bit_depth": null,
+                "chroma": "Color",
+                "computer_name": "W10DT713668",
+                "cooling": null,
+                "crop_height": null,
+                "crop_unit": "pixel",
+                "crop_width": null,
+                "data_interface": "USB",
+                "detector_type": "Camera",
+                "device_type": "Detector",
+                "driver": null,
+                "driver_version": null,
+                "frame_rate_unit": "hertz",
+                "gain": null,
+                "immersion": null,
+                "manufacturer": {
+                    "abbreviation": "FLIR",
+                    "name": "Teledyne FLIR",
+                    "registry": {
+                        "abbreviation": "ROR",
+                        "name": "Research Organization Registry"
+                    },
+                    "registry_identifier": "01j1gwp17"
+                },
+                "max_frame_rate": "31",
+                "model": "Blackfly S BFS-U3-120S4C",
+                "name": "Probe Camera 1",
+                "notes": null,
+                "path_to_cad": null,
+                "port_index": null,
+                "recording_software": null,
+                "sensor_format": "1/1.7",
+                "sensor_format_unit": "inches",
+                "sensor_height": 3000,
+                "sensor_width": 4000,
+                "serial_number": "22438385",
+                "size_unit": "pixel"
+            },
+            "camera_assembly_name": "Stick_assembly_1",
+            "camera_target": "Brain surface",
+            "filter": null,
+            "lens": {
+                "additional_settings": {},
+                "device_type": "Lens",
+                "focal_length": null,
+                "focal_length_unit": "millimeter",
+                "lens_size_unit": "inch",
+                "manufacturer": {
+                    "abbreviation": null,
+                    "name": "Edmund Optics",
+                    "registry": {
+                        "abbreviation": "ROR",
+                        "name": "Research Organization Registry"
+                    },
+                    "registry_identifier": "01j1gwp17"
+                },
+                "max_aperture": null,
+                "model": "InfiniProbe S-25",
+                "name": "Probe lens",
+                "notes": null,
+                "optimized_wavelength_range": null,
+                "path_to_cad": null,
+                "port_index": null,
+                "serial_number": null,
+                "size": null,
+                "wavelength_unit": "nanometer"
+            },
+            "position": null
+        },
+        {
+            "camera": {
+                "additional_settings": {},
+                "bin_height": null,
+                "bin_mode": "None",
+                "bin_unit": "pixel",
+                "bin_width": null,
+                "bit_depth": null,
+                "chroma": "Color",
+                "computer_name": "W10DT713668",
+                "cooling": null,
+                "crop_height": null,
+                "crop_unit": "pixel",
+                "crop_width": null,
+                "data_interface": "USB",
+                "detector_type": "Camera",
+                "device_type": "Detector",
+                "driver": null,
+                "driver_version": null,
+                "frame_rate_unit": "hertz",
+                "gain": null,
+                "immersion": null,
+                "manufacturer": {
+                    "abbreviation": "FLIR",
+                    "name": "Teledyne FLIR",
+                    "registry": {
+                        "abbreviation": "ROR",
+                        "name": "Research Organization Registry"
+                    },
+                    "registry_identifier": "01j1gwp17"
+                },
+                "max_frame_rate": "31",
+                "model": "Blackfly S BFS-U3-120S4C",
+                "name": "Probe Camera 2",
+                "notes": null,
+                "path_to_cad": null,
+                "port_index": null,
+                "recording_software": null,
+                "sensor_format": "1/1.7",
+                "sensor_format_unit": "inches",
+                "sensor_height": 3000,
+                "sensor_width": 4000,
+                "serial_number": "20105611",
+                "size_unit": "pixel"
+            },
+            "camera_assembly_name": "Stick_assembly_2",
+            "camera_target": "Brain surface",
+            "filter": null,
+            "lens": {
+                "additional_settings": {},
+                "device_type": "Lens",
+                "focal_length": null,
+                "focal_length_unit": "millimeter",
+                "lens_size_unit": "inch",
+                "manufacturer": {
+                    "abbreviation": null,
+                    "name": "Edmund Optics",
+                    "registry": {
+                        "abbreviation": "ROR",
+                        "name": "Research Organization Registry"
+                    },
+                    "registry_identifier": "01j1gwp17"
+                },
+                "max_aperture": null,
+                "model": "InfiniProbe S-25",
+                "name": "Probe lens",
+                "notes": null,
+                "optimized_wavelength_range": null,
+                "path_to_cad": null,
+                "port_index": null,
+                "serial_number": null,
+                "size": null,
+                "wavelength_unit": "nanometer"
+            },
+            "position": null
+        },
+        {
+            "camera": {
+                "additional_settings": {},
+                "bin_height": null,
+                "bin_mode": "None",
+                "bin_unit": "pixel",
+                "bin_width": null,
+                "bit_depth": null,
+                "chroma": "Color",
+                "computer_name": "W10DT713668",
+                "cooling": null,
+                "crop_height": null,
+                "crop_unit": "pixel",
+                "crop_width": null,
+                "data_interface": "USB",
+                "detector_type": "Camera",
+                "device_type": "Detector",
+                "driver": null,
+                "driver_version": null,
+                "frame_rate_unit": "hertz",
+                "gain": null,
+                "immersion": null,
+                "manufacturer": {
+                    "abbreviation": "FLIR",
+                    "name": "Teledyne FLIR",
+                    "registry": {
+                        "abbreviation": "ROR",
+                        "name": "Research Organization Registry"
+                    },
+                    "registry_identifier": "01j1gwp17"
+                },
+                "max_frame_rate": "31",
+                "model": "Blackfly S BFS-U3-120S4C",
+                "name": "Probe Camera 3",
+                "notes": null,
+                "path_to_cad": null,
+                "port_index": null,
+                "recording_software": null,
+                "sensor_format": "1/1.7",
+                "sensor_format_unit": "inches",
+                "sensor_height": 3000,
+                "sensor_width": 4000,
+                "serial_number": "22438379",
+                "size_unit": "pixel"
+            },
+            "camera_assembly_name": "Stick_assembly_3",
+            "camera_target": "Brain surface",
+            "filter": null,
+            "lens": {
+                "additional_settings": {},
+                "device_type": "Lens",
+                "focal_length": null,
+                "focal_length_unit": "millimeter",
+                "lens_size_unit": "inch",
+                "manufacturer": {
+                    "abbreviation": null,
+                    "name": "Edmund Optics",
+                    "registry": {
+                        "abbreviation": "ROR",
+                        "name": "Research Organization Registry"
+                    },
+                    "registry_identifier": "01j1gwp17"
+                },
+                "max_aperture": null,
+                "model": "InfiniProbe S-25",
+                "name": "Probe lens",
+                "notes": null,
+                "optimized_wavelength_range": null,
+                "path_to_cad": null,
+                "port_index": null,
+                "serial_number": null,
+                "size": null,
+                "wavelength_unit": "nanometer"
+            },
+            "position": null
+        }
+    ],
+    "stimulus_devices": []
+}
