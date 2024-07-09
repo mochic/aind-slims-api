@@ -2,9 +2,14 @@ import os
 import logging
 import requests
 
-from pydantic import Field, ValidationError, BaseModel
+from pydantic import (
+    Field, ValidationError, ValidationInfo, BaseModel, field_validator
+)
+from typing import Callable
 
-from aind_slims_api.core import SlimsClient, SlimsBaseModel, SLIMSTABLES
+from aind_slims_api.core import (
+    SlimsClient, SlimsBaseModel, SLIMSTABLES,
+)
 from slims.criteria import conjunction, equals
 
 
@@ -23,6 +28,13 @@ class SlimsReferenceDataAssetAttachment(SlimsBaseModel):
     pk: int = Field(..., alias="attm_pk")
     links: list[SlimsLink] = Field(..., alias="links")
     _slims_table: SLIMSTABLES = "ReferenceDataRecordAttachment"
+
+    # @field_validator("links", mode="before")
+    # @classmethod
+    # def _validate(cls, value: ]):
+    #     if isinstance(value, list):
+    #         print(type(value[0]))
+    #     return super()._validate(value, info)
 
     def fetch_content(
         self,
@@ -50,6 +62,15 @@ class SlimsReferenceDataAsset(SlimsBaseModel):
     attachments: list[SlimsReferenceDataAssetAttachment] = Field(...,)
     _slims_table: SLIMSTABLES = "ReferenceDataRecord"
 
+    @field_validator("attachments", mode="before")
+    @classmethod
+    def _validate(cls, value) -> list[SlimsReferenceDataAssetAttachment]:
+        # attachment_records = value()
+        # print(dir(attachment_records[0]))
+        return [
+            SlimsReferenceDataAssetAttachment.model_validate(attachment)
+            for attachment in value()
+        ]
     # def attachments(self) -> list[SlimsReferenceDataAssetAttachment]:
     #     validated = []
     #     for attachment in self.json_entity["attachments"]:
