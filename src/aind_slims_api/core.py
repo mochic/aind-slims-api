@@ -16,7 +16,6 @@ from pydantic import (
     ValidationError,
     field_serializer,
     field_validator,
-
 )
 from pydantic.fields import FieldInfo
 import logging
@@ -139,14 +138,18 @@ class SlimsBaseModel(
 
     def fetch_attachments_content(self) -> \
             Generator[dict[str, Any], None, None]:
-        """
+        """Fetches the content of all attachments for this record and returns
+        them as dictionaries.
 
         Notes
         -----
+        - Assumes that the attachments are json
         - Should this actually be text and not json?
         """
         for attachment in self.attachments():
-            yield attachment.resolve_content()
+            response = attachment.slims_api.get(f"repo/{attachment.pk}")
+            response.raise_for_status()
+            yield response.json()
 
 
 SlimsBaseModelTypeVar = TypeVar("SlimsBaseModelTypeVar", bound=SlimsBaseModel)
@@ -158,7 +161,6 @@ class SlimsClient:
     def __init__(self, url=None, username=None, password=None):
         """Create object and try to connect to database"""
         self.url = url or config.slims_url
-        self.db: Optional[Slims] = None
 
         self.connect(
             self.url,
