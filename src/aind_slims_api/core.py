@@ -16,15 +16,19 @@ from pydantic import (
     ValidationError,
     field_serializer,
     field_validator,
+
 )
 from pydantic.fields import FieldInfo
 import logging
-from typing import Any, Literal, Optional, Type, TypeVar
+from typing import (
+    Any, Callable, Literal, Optional, Sequence, Type, TypeVar
+)
 
 from slims.slims import Slims, _SlimsApiException
 from slims.internal import (
     Column as SlimsColumn,
     Record as SlimsRecord,
+    Attachment as SlimsAttachment,
 )
 from slims.criteria import Criterion, conjunction, equals
 
@@ -90,6 +94,7 @@ class SlimsBaseModel(
 
     pk: int = None
     json_entity: dict = None
+    attachments: Callable[[], Sequence[SlimsAttachment]] = None
     _slims_table: SLIMSTABLES
 
     @field_validator("*", mode="before")
@@ -131,7 +136,16 @@ class SlimsBaseModel(
 
     # TODO: Add links - need Record.json_entity['links']['self']
     # TODO: Add Table - need Record.json_entity['tableName']
-    # TODO: Support attachments
+
+    def fetch_attachments_content(self):
+        """
+
+        Notes
+        -----
+        - Should this actually be text and not json?
+        """
+        for attachment in self.attachments:
+            attachment.resolve_content()
 
 
 SlimsBaseModelTypeVar = TypeVar("SlimsBaseModelTypeVar", bound=SlimsBaseModel)
@@ -291,7 +305,7 @@ class SlimsClient:
         """
         fields_to_include = set(args) or None
         fields_to_exclude = set(kwargs.get("exclude", []))
-        fields_to_exclude.add("pk")
+        fields_to_exclude.update(["pk", "attachments"])
         rtn = self.add(
             model._slims_table,
             model.model_dump(
