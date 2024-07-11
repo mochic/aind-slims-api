@@ -16,15 +16,18 @@ from pydantic import (
     ValidationError,
     field_serializer,
     field_validator,
+    ConfigDict,
+    Field,
 )
 from pydantic.fields import FieldInfo
 import logging
-from typing import Any, Literal, Optional, Type, TypeVar
+from typing import Any, Literal, Optional, Type, TypeVar, Generator, Callable, Sequence, Optional
 
 from slims.slims import Slims, _SlimsApiException
 from slims.internal import (
     Column as SlimsColumn,
-    Record as SlimsRecord,
+    Record as SlimsRecordInternal,
+    Attachment as SlimsAttachmentInternal,
 )
 from slims.criteria import Criterion, conjunction, equals
 
@@ -89,10 +92,14 @@ class SlimsBaseModel(
 
     Datetime fields will be serialized to an integer ms timestamp
     """
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     pk: int = None
     json_entity: dict = None
+    attachments: Callable[[], Sequence[SlimsAttachmentInternal]] = Field(..., alias="attachments")
+    links: Optional[list] = None
     _slims_table: SLIMSTABLES
+    _attachment_model: Optional[BaseModel] = None
 
     @field_validator("*", mode="before")
     def _validate(cls, value, info: ValidationInfo):
@@ -113,6 +120,8 @@ class SlimsBaseModel(
                     )
                     raise ValueError(msg)
             return value.value
+        # elif info.field_name in ("attachments", "table_name"):
+        #     return value()
         else:
             return value
 
@@ -132,8 +141,14 @@ class SlimsBaseModel(
             return field
 
     # TODO: Add links - need Record.json_entity['links']['self']
-    # TODO: Add Table - need Record.json_entity['tableName']
-    # TODO: Support attachments
+
+    def resolve_attachments_content(self) -> \
+            Generator[dict[str, Any], None, None]:
+        for attachment in self.attachments():
+            response = attachment.slims_api.get(
+                f"repo/{attachment.attm_pk.value}")
+            response.raise_for_status()
+            yield response.json()
 
 
 SlimsBaseModelTypeVar = TypeVar("SlimsBaseModelTypeVar", bound=SlimsBaseModel)
@@ -170,7 +185,7 @@ class SlimsClient:
         start: Optional[int] = None,
         end: Optional[int] = None,
         **kwargs,
-    ) -> list[SlimsRecord]:
+    ) -> list[SlimsRecordInternal]:
         """Fetch from the SLIMS database
 
         Args:
@@ -182,7 +197,7 @@ class SlimsClient:
             **kwargs (dict[str,str]): "field=value" filters
 
         Returns:
-            records (list[SlimsRecord] | None): Matching records, if any
+            records (list[SlimsRecordInternal] | None): Matching records, if any
         """
         criteria = conjunction()
         for arg in args:
@@ -293,7 +308,7 @@ class SlimsClient:
         """
         fields_to_include = set(args) or None
         fields_to_exclude = set(kwargs.get("exclude", []))
-        fields_to_exclude.add("pk")
+        fields_to_exclude.update(["pk", "attachments", ])
         rtn = self.add(
             model._slims_table,
             model.model_dump(

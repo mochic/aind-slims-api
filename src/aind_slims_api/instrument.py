@@ -48,7 +48,6 @@ def fetch_instrument_content(
      having number returned be a parameter or setting
     """
     if instrument_id is not None:
-        print("bur")
         validated, unvalidated = client.fetch_models(
             SlimsInstrument,
             rig_id=instrument_id,
@@ -82,10 +81,10 @@ def fetch_instrument_content(
 
 if __name__ == "__main__":
     import doctest
-    import dotenv
     import logging
+
     logging.basicConfig(level=logging.DEBUG)
-    dotenv.load_dotenv()
+
     doctest.testmod(
         optionflags=(
             doctest.IGNORE_EXCEPTION_DETAIL | doctest.NORMALIZE_WHITESPACE

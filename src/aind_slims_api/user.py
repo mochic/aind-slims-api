@@ -1,7 +1,7 @@
 """Contains a model for a user, and a method for fetching it"""
 
 import logging
-from typing import Optional
+from typing import Optional, Literal
 
 from pydantic import Field, ValidationError
 
@@ -20,8 +20,10 @@ class SlimsUser(SlimsBaseModel):
     full_name: Optional[str] = Field("", alias="user_fullName")
     email: Optional[str] = Field("", alias="user_email")
     pk: int = Field(..., alias="user_pk")
+    
+    _filters = 
 
-    _slims_table: str = "User"
+    _slims_table: str = Literal["User"]
 
 
 def fetch_user(
