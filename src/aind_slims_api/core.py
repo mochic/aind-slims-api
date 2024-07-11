@@ -21,7 +21,7 @@ from pydantic import (
 from pydantic.fields import FieldInfo
 import logging
 from typing import (
-    Any, Callable, Literal, Optional, Sequence, Type, TypeVar
+    Any, Generator, Callable, Literal, Optional, Sequence, Type, TypeVar
 )
 
 from slims.slims import Slims, _SlimsApiException
@@ -137,15 +137,16 @@ class SlimsBaseModel(
     # TODO: Add links - need Record.json_entity['links']['self']
     # TODO: Add Table - need Record.json_entity['tableName']
 
-    def fetch_attachments_content(self):
+    def fetch_attachments_content(self) -> \
+            Generator[dict[str, Any], None, None]:
         """
 
         Notes
         -----
         - Should this actually be text and not json?
         """
-        for attachment in self.attachments:
-            attachment.resolve_content()
+        for attachment in self.attachments():
+            yield attachment.resolve_content()
 
 
 SlimsBaseModelTypeVar = TypeVar("SlimsBaseModelTypeVar", bound=SlimsBaseModel)
