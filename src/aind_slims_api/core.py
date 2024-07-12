@@ -11,6 +11,7 @@ SlimsClient - Basic wrapper around slims-python-api client with convenience
 from datetime import datetime
 from functools import lru_cache
 from pydantic import (
+    Field,
     BaseModel,
     ValidationInfo,
     ValidationError,
@@ -22,12 +23,11 @@ import logging
 from typing import (
     Any, Generator, Callable, Literal, Optional, Sequence, Type, TypeVar
 )
-
+from requests import Response
 from slims.slims import Slims, _SlimsApiException
 from slims.internal import (
     Column as SlimsColumn,
     Record as SlimsRecord,
-    Attachment as SlimsAttachment,
 )
 from slims.criteria import Criterion, conjunction, equals
 
@@ -37,6 +37,7 @@ logger = logging.getLogger()
 
 # List of slims tables manually accessed, there are many more
 SLIMSTABLES = Literal[
+    "Attachment",
     "Project",
     "Content",
     "ContentEvent",
@@ -93,7 +94,7 @@ class SlimsBaseModel(
 
     pk: int = None
     json_entity: dict = None
-    attachments: Callable[[], Sequence[SlimsAttachment]] = None
+    attachments: Optional[Callable[[], Sequence['Attachment']]] = None
     _slims_table: SLIMSTABLES
 
     @field_validator("*", mode="before")
@@ -115,6 +116,11 @@ class SlimsBaseModel(
                     )
                     raise ValueError(msg)
             return value.value
+        elif info.field_name in ("attachments", ):
+            if isinstance(value, dict):
+                return None
+            else:
+                return value
         else:
             return value
 
@@ -136,8 +142,21 @@ class SlimsBaseModel(
     # TODO: Add links - need Record.json_entity['links']['self']
     # TODO: Add Table - need Record.json_entity['tableName']
 
+    def fetch_attachments(self) -> Sequence['Attachment']:
+        """Fetches all attachments for this record"""
+        if not self.attachments:
+            logger.debug("Initialized without attachments.")
+            return []
+        validated = []
+        for attachment in self.attachments():
+            try:
+                validated.append(Attachment.model_validate(attachment))
+            except ValidationError as e:
+                logger.error(f"SLIMS data validation failed, {repr(e)}")
+        return validated
+
     def fetch_attachments_content(self) -> \
-            Generator[dict[str, Any], None, None]:
+            Generator[Response, None, None]:
         """Fetches the content of all attachments for this record and returns
         them as dictionaries.
 
@@ -146,10 +165,29 @@ class SlimsBaseModel(
         - Assumes that the attachments are json
         - Should this actually be text and not json?
         """
-        for attachment in self.attachments():
-            response = attachment.slims_api.get(f"repo/{attachment.pk}")
-            response.raise_for_status()
-            yield response.json()
+        for attachment in self.fetch_attachments():
+            yield attachment.fetch_content()
+
+
+class Attachment(SlimsBaseModel):
+
+    pk: int = Field(..., alias="attm_pk")
+    slims_api: Slims
+    _slims_table: SLIMSTABLES = "Attachment"
+
+    class Config:
+        arbitrary_types_allowed = True
+
+    def fetch_content(self) -> Response:
+        """Fetches the content of this attachment"""
+        return self.slims_api.get(f"repo/{self.pk}")
+
+    # attm_pk: SlimsColumn
+    # attm_fk_content: SlimsColumn
+    # attm_fk_user: SlimsColumn
+    # attm_fk_attachmentType: SlimsColumn
+    # attm_fk_status: SlimsColumn
+    # attm_fk_file
 
 
 SlimsBaseModelTypeVar = TypeVar("SlimsBaseModelTypeVar", bound=SlimsBaseModel)
@@ -308,7 +346,7 @@ class SlimsClient:
         """
         fields_to_include = set(args) or None
         fields_to_exclude = set(kwargs.get("exclude", []))
-        fields_to_exclude.update(["pk", "attachments"])
+        fields_to_exclude.update(["pk", "attachments", "slims_api"])
         rtn = self.add(
             model._slims_table,
             model.model_dump(
