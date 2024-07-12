@@ -298,10 +298,20 @@ class SlimsClient:
             for name, value in kwargs.items()
         }
         logger.debug("Resolved kwargs: %s", resolved_kwargs)
+        resolved_sort: Optional[str | list[str]] = None
+        if sort is not None:
+            if isinstance(sort, str):
+                resolved_sort = self.resolve_model_alias(model, sort)
+            else:
+                resolved_sort = [
+                    self.resolve_model_alias(model, sort_key)
+                    for sort_key in sort
+                ]
+        logger.debug("Resolved sort: %s", resolved_sort)
         response = self.fetch(
             model._slims_table.default,  # TODO: consider changing fetch method
             *args,
-            sort=sort,
+            sort=resolved_sort,
             start=start,
             end=end,
             **resolved_kwargs,
@@ -314,6 +324,35 @@ class SlimsClient:
                 logger.error(f"SLIMS data validation failed, {repr(e)}")
 
         return validated
+
+    def fetch_model(
+        self,
+        model: Type[SlimsBaseModelTypeVar],
+        *args,
+        sort: Optional[str | list[str]] = None,
+        start: Optional[int] = None,
+        end: Optional[int] = None,
+        **kwargs
+    ) -> SlimsBaseModelTypeVar:
+        """Fetch a single record from SLIMS and return it as a validated
+         SlimsBaseModel object.
+
+        Notes
+        -----
+        - kwargs are mapped to field alias values
+        """
+        records = self.fetch_models(
+            model,
+            *args,
+            sort=sort,
+            start=start,
+            end=end,
+            **kwargs,
+        )
+        if len(records) > 0:
+            logger.debug(f"Found {len(records)} records for {model}.")
+        return records[0]
+
 
     @lru_cache(maxsize=None)
     def fetch_pk(self, table: SLIMSTABLES, *args, **kwargs) -> int | None:
