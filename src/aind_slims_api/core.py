@@ -259,6 +259,19 @@ class SlimsClient:
 
         return records
 
+    def resolve_model_alias(
+        self,
+        model: Type[SlimsBaseModelTypeVar],
+        attr_name: str,
+    ) -> str:
+        """Given a SlimsBaseModel object, resolve its pk to the actual value"""
+        for field_name, field_info in model.model_fields.items():
+            if field_info.alias == attr_name:
+                return field_name
+        else:
+            raise ValueError(
+                f"Cannot resolve alias for {attr_name} on {model}")
+
     def fetch_models(
         self,
         model: Type[SlimsBaseModelTypeVar],
@@ -278,13 +291,18 @@ class SlimsClient:
             list:
                 Dictionaries representations of objects that failed validation
         """
+        resolved_kwargs = {
+            self.resolve_model_alias(model, name): value
+            for name, value in kwargs.items()
+        }
+        logger.debug("Resolved kwargs: %s", resolved_kwargs)
         response = self.fetch(
             model._slims_table.default,  # TODO: consider changing fetch method
             *args,
             sort=sort,
             start=start,
             end=end,
-            **kwargs,
+            **resolved_kwargs,
         )
         validated = []
         unvalidated = []
