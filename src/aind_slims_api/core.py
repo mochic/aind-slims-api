@@ -353,7 +353,6 @@ class SlimsClient:
             logger.debug(f"Found {len(records)} records for {model}.")
         return records[0]
 
-
     @lru_cache(maxsize=None)
     def fetch_pk(self, table: SLIMSTABLES, *args, **kwargs) -> int | None:
         """SlimsClient.fetch but returns the pk of the first returned record"""

@@ -33,9 +33,7 @@ class SlimsBehaviorSessionContentEvent(SlimsBaseModel):
     )
     software_version: str | None = Field(default=None, alias="cnvn_cf_softwareVersion")
     date: datetime | None = Field(..., alias="cnvn_cf_scheduledDate")
-
     cnvn_fk_contentEventType: int = 10  # pk of Behavior Session ContentEvent
-
     _slims_table: SLIMSTABLES = "ContentEvent"
 
 
