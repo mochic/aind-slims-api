@@ -172,7 +172,7 @@ class SlimsBaseModel(
 class Attachment(SlimsBaseModel):
 
     pk: int = Field(..., alias="attm_pk")
-    slims_api: Slims
+    slims_api: Optional[Slims] = None
     _slims_table: SLIMSTABLES = "Attachment"
 
     class Config:
@@ -180,6 +180,8 @@ class Attachment(SlimsBaseModel):
 
     def fetch_content(self) -> Response:
         """Fetches the content of this attachment"""
+        if not self.slims_api:
+            raise ValueError("Initialized without slims_api.")
         return self.slims_api.get(f"repo/{self.pk}")
 
     # attm_pk: SlimsColumn
