@@ -280,7 +280,7 @@ class SlimsClient:
         start: Optional[int] = None,
         end: Optional[int] = None,
         **kwargs,
-    ) -> tuple[list[SlimsBaseModelTypeVar], list[dict[str, Any]]]:
+    ) -> list[SlimsBaseModelTypeVar]:
         """Fetch records from SLIMS and return them as SlimsBaseModel objects
 
         Returns
@@ -288,8 +288,10 @@ class SlimsClient:
         tuple:
             list:
                 Validated SlimsBaseModel objects
-            list:
-                Dictionaries representations of objects that failed validation
+
+        Notes
+        -----
+        - kwargs are mapped to field alias values
         """
         resolved_kwargs = {
             self.resolve_model_alias(model, name): value
@@ -305,15 +307,13 @@ class SlimsClient:
             **resolved_kwargs,
         )
         validated = []
-        unvalidated = []
         for record in response:
             try:
                 validated.append(model.model_validate(record))
             except ValidationError as e:
                 logger.error(f"SLIMS data validation failed, {repr(e)}")
-                unvalidated.append(record.json_entity)
 
-        return validated, unvalidated
+        return validated
 
     @lru_cache(maxsize=None)
     def fetch_pk(self, table: SLIMSTABLES, *args, **kwargs) -> int | None:
