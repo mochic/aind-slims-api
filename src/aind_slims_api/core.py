@@ -28,6 +28,7 @@ from slims.slims import Slims, _SlimsApiException
 from slims.internal import (
     Column as SlimsColumn,
     Record as SlimsRecord,
+    Attachment as SlimsAttachment,
 )
 from slims.criteria import Criterion, conjunction, equals
 
@@ -94,7 +95,7 @@ class SlimsBaseModel(
 
     pk: int = None
     json_entity: dict = None
-    attachments: Optional[Callable[[], Sequence['Attachment']]] = None
+    attachments: Optional[Callable[[], Sequence[SlimsAttachment]]] = None
     _slims_table: SLIMSTABLES
 
     @field_validator("*", mode="before")
@@ -142,45 +143,45 @@ class SlimsBaseModel(
     # TODO: Add links - need Record.json_entity['links']['self']
     # TODO: Add Table - need Record.json_entity['tableName']
 
-    def fetch_attachments(self) -> Sequence['Attachment']:
-        """Fetches all attachments for this record"""
-        if not self.attachments:
-            logger.debug("Initialized without attachments.")
-            return []
-        validated = []
-        for attachment in self.attachments():
-            try:
-                validated.append(Attachment.model_validate(attachment))
-            except ValidationError as e:
-                logger.error(f"SLIMS data validation failed, {repr(e)}")
-        return validated
+    # def fetch_attachments(self) -> Sequence['Attachment']:
+    #     """Fetches all attachments for this record"""
+    #     if not self.attachments:
+    #         logger.debug("Initialized without attachments.")
+    #         return []
+    #     validated = []
+    #     for attachment in self.attachments():
+    #         try:
+    #             validated.append(Attachment.model_validate(attachment))
+    #         except ValidationError as e:
+    #             logger.error(f"SLIMS data validation failed, {repr(e)}")
+    #     return validated
 
-    def fetch_attachments_content(self) -> \
-            Generator[Response, None, None]:
-        """Fetches the content of all attachments for this record and returns
-        them as dictionaries.
+    # def fetch_attachments_content(self) -> \
+    #         Generator[Response, None, None]:
+    #     """Fetches the content of all attachments for this record and returns
+    #     them as dictionaries.
 
-        Notes
-        -----
-        - Assumes that the attachments are json
-        - Should this actually be text and not json?
-        """
-        for attachment in self.fetch_attachments():
-            yield attachment.fetch_content()
+    #     Notes
+    #     -----
+    #     - Assumes that the attachments are json
+    #     - Should this actually be text and not json?
+    #     """
+    #     for attachment in self.fetch_attachments():
+    #         yield attachment.fetch_content()
 
 
-class Attachment(SlimsBaseModel):
+# class Attachment(SlimsBaseModel):
 
-    pk: int = Field(..., alias="attm_pk")
-    slims_api: Slims
-    _slims_table: SLIMSTABLES = "Attachment"
+#     pk: int = Field(..., alias="attm_pk")
+#     slims_api: Slims
+#     _slims_table: SLIMSTABLES = "Attachment"
 
-    class Config:
-        arbitrary_types_allowed = True
+#     class Config:
+#         arbitrary_types_allowed = True
 
-    def fetch_content(self) -> Response:
-        """Fetches the content of this attachment"""
-        return self.slims_api.get(f"repo/{self.pk}")
+#     def fetch_content(self) -> Response:
+#         """Fetches the content of this attachment"""
+#         return self.slims_api.get(f"repo/{self.pk}")
 
     # attm_pk: SlimsColumn
     # attm_fk_content: SlimsColumn
@@ -352,6 +353,17 @@ class SlimsClient:
         if len(records) > 0:
             logger.debug(f"Found {len(records)} records for {model}.")
         return records[0]
+
+    def fetch_attachments_contents(
+        self,
+        record: SlimsBaseModel,
+    ) -> Generator[Response, None, None]:
+        """Fetches all attachments for a record"""
+        if not record.attachments:
+            raise ValueError("Record initialized no attachments.")
+
+        for attachment in record.attachments():
+            yield attachment.slims_api.get(f"repo/{attachment.attm_pk}")
 
     @lru_cache(maxsize=None)
     def fetch_pk(self, table: SLIMSTABLES, *args, **kwargs) -> int | None:
