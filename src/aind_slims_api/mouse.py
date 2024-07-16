@@ -1,7 +1,7 @@
 """Contains a model for the mouse content, and a method for fetching it"""
 
 import logging
-from typing import Annotated
+from typing import Annotated, ClassVar
 
 from pydantic import Field, BeforeValidator, ValidationError
 
@@ -11,7 +11,14 @@ logger = logging.getLogger()
 
 
 class SlimsMouseContent(SlimsBaseModel):
-    """Model for an instance of the Mouse ContentType"""
+    """Model for an instance of the Mouse ContentType
+    
+    Examples
+    --------
+    >>> from aind_slims_api.core import SlimsClient
+    >>> client = SlimsClient()
+    >>> mouse = client.fetch_model(SlimsMouseContent, barcode="00000000")
+    """
 
     baseline_weight_g: Annotated[float | None, UnitSpec("g")] = Field(
         ..., alias="cntn_cf_baselineWeight"
@@ -24,6 +31,9 @@ class SlimsMouseContent(SlimsBaseModel):
     pk: int = Field(..., alias="cntn_pk")
 
     _slims_table: SLIMSTABLES = "Content"
+    _base_fetch_filters: ClassVar[dict[str, int | str]] = {
+        "cntp_name": "Mouse",
+    }
 
     # TODO: Include other helpful fields (genotype, gender...)
 
@@ -71,3 +81,9 @@ def fetch_mouse_content(
         return mouse_details.json_entity
 
     return mouse
+
+
+if __name__ == "__main__":
+    from aind_slims_api import testmod
+
+    testmod()

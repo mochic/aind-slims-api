@@ -1,18 +1,19 @@
 """Contains a model for a user, and a method for fetching it"""
-
-import logging
 from typing import Optional
 
-from pydantic import Field, ValidationError
+from pydantic import Field
 
-from aind_slims_api.core import SlimsBaseModel, SlimsClient
-
-logger = logging.getLogger()
+from aind_slims_api.core import SlimsBaseModel, SLIMSTABLES
 
 
 # TODO: Tighten this up once users are more commonly used
 class SlimsUser(SlimsBaseModel):
-    """Model for user information in SLIMS"""
+    """Model for user information in SLIMS
+
+    >>> from aind_slims_api.core import SlimsClient
+    >>> client = SlimsClient()
+    >>> user = client.fetch_model(SlimsUser, "LisaK")
+    """
 
     username: str = Field(..., alias="user_userName")
     first_name: Optional[str] = Field("", alias="user_firstName")
@@ -21,35 +22,10 @@ class SlimsUser(SlimsBaseModel):
     email: Optional[str] = Field("", alias="user_email")
     pk: int = Field(..., alias="user_pk")
 
-    _slims_table: str = "User"
+    _slims_table: SLIMSTABLES = "User"
 
 
-def fetch_user(
-    client: SlimsClient,
-    username: str,
-) -> SlimsUser | dict | None:
-    """Fetches user information for a user with username {username}"""
-    users = client.fetch(
-        "User",
-        user_userName=username,
-    )
+if __name__ == "__main__":
+    from aind_slims_api import testmod
 
-    if len(users) > 0:
-        user_details = users[0]
-        if len(users) > 1:
-            logger.warning(
-                f"Warning, Multiple users in SLIMS with "
-                f"username {username}, "
-                f"using pk={user_details.pk()}"
-            )
-    else:
-        logger.warning("Warning, User not in SLIMS")
-        return
-
-    try:
-        user = SlimsUser.model_validate(user_details)
-    except ValidationError as e:
-        logger.error(f"SLIMS data validation failed, {repr(e)}")
-        return user_details.json_entity
-
-    return user
+    testmod()

@@ -22,14 +22,14 @@ from copy import deepcopy
 from pydantic.fields import FieldInfo
 import logging
 from typing import (
-    Any, Generator, Callable, Literal, Optional, Sequence, Type, TypeVar,
+    ClassVar, Literal, Optional, Type,
+    TypeVar,
 )
 from requests import Response
 from slims.slims import Slims, _SlimsApiException
 from slims.internal import (
     Column as SlimsColumn,
     Record as SlimsRecord,
-    Attachment as SlimsAttachment,
 )
 from slims.criteria import Criterion, conjunction, equals
 
@@ -49,6 +49,7 @@ SLIMSTABLES = Literal[
     "User",
     "Groups",
     "Instrument",
+    "Unit",
 ]
 
 
@@ -56,7 +57,7 @@ class UnitSpec:
     """Used in type annotation metadata to specify units"""
 
     units: list[str]
-    preferred_unit: str = None
+    preferred_unit: Optional[str] = None
 
     def __init__(self, *args, preferred_unit=None):
         """Set list of acceptable units from args, and preferred_unit"""
@@ -94,11 +95,10 @@ class SlimsBaseModel(
     Datetime fields will be serialized to an integer ms timestamp
     """
 
-    pk: int = None
-    json_entity: dict = None
-    attachments: Optional[Callable[[], Sequence[SlimsAttachment]]] = None
+    pk: Optional[int] = None
+    json_entity: Optional[dict] = None
     _slims_table: SLIMSTABLES
-    _base_fetch_filters: dict[str, str | int]  # use for fetch_models, fetch_model
+    _base_fetch_filters: ClassVar[dict[str, str | int]] = {}  # use for fetch_models, fetch_model
 
     @field_validator("*", mode="before")
     def _validate(cls, value, info: ValidationInfo):
@@ -119,11 +119,6 @@ class SlimsBaseModel(
                     )
                     raise ValueError(msg)
             return value.value
-        elif info.field_name in ("attachments", ):
-            if isinstance(value, dict):
-                return None
-            else:
-                return value
         else:
             return value
 
@@ -145,53 +140,12 @@ class SlimsBaseModel(
     # TODO: Add links - need Record.json_entity['links']['self']
     # TODO: Add Table - need Record.json_entity['tableName']
 
-    # def fetch_attachments(self) -> Sequence['Attachment']:
-    #     """Fetches all attachments for this record"""
-    #     if not self.attachments:
-    #         logger.debug("Initialized without attachments.")
-    #         return []
-    #     validated = []
-    #     for attachment in self.attachments():
-    #         try:
-    #             validated.append(Attachment.model_validate(attachment))
-    #         except ValidationError as e:
-    #             logger.error(f"SLIMS data validation failed, {repr(e)}")
-    #     return validated
-
-    # def fetch_attachments_content(self) -> \
-    #         Generator[Response, None, None]:
-    #     """Fetches the content of all attachments for this record and returns
-    #     them as dictionaries.
-
-    #     Notes
-    #     -----
-    #     - Assumes that the attachments are json
-    #     - Should this actually be text and not json?
-    #     """
-    #     for attachment in self.fetch_attachments():
-    #         yield attachment.fetch_content()
-
 
 class Attachment(SlimsBaseModel):
 
     pk: int = Field(..., alias="attm_pk")
     name: str = Field(..., alias="attm_name")
-    # slims_api: Slims
     _slims_table: SLIMSTABLES = "Attachment"
-
-    # class Config:
-    #     arbitrary_types_allowed = True
-
-    # def fetch_content(self) -> Response:
-    #     """Fetches the content of this attachment"""
-    #     return self.slims_api.get(f"repo/{self.pk}")
-
-    # attm_pk: SlimsColumn
-    # attm_fk_content: SlimsColumn
-    # attm_fk_user: SlimsColumn
-    # attm_fk_attachmentType: SlimsColumn
-    # attm_fk_status: SlimsColumn
-    # attm_fk_file
 
 
 SlimsBaseModelTypeVar = TypeVar("SlimsBaseModelTypeVar", bound=SlimsBaseModel)
@@ -272,8 +226,8 @@ class SlimsClient:
     ) -> str:
         """Given a SlimsBaseModel object, resolve its pk to the actual value"""
         for field_name, field_info in model.model_fields.items():
-            if field_info.alias == attr_name:
-                return field_name
+            if field_name == attr_name and field_info.alias:
+                return field_info.alias
         else:
             raise ValueError(
                 f"Cannot resolve alias for {attr_name} on {model}")
@@ -315,14 +269,6 @@ class SlimsClient:
         resolved_kwargs = deepcopy(model._base_fetch_filters)
         for name, value in kwargs.items():
             resolved_kwargs[self.resolve_model_alias(model, name)] = value
-        # resolved_kwargs = {
-        #     self.resolve_model_alias(model, name): value
-        #     for name, value in kwargs.items()
-        # }
-        # for filter_name, filter_value in model._base_fetch_filters:
-        #     if filter_name in resolved_kwargs:
-
-        #     resolved_kwargs[filter_name] = filter_value
         logger.debug("Resolved kwargs: %s", resolved_kwargs)
         resolved_sort: Optional[str | list[str]] = None
         if sort is not None:
@@ -385,17 +331,6 @@ class SlimsClient:
 
     def fetch_attachment_content(self, attachment: Attachment) -> Response:
         return self.db.slims_api.get(f"repo/{attachment.pk}")
-
-    # def fetch_attachments_contents(
-    #     self,
-    #     record: SlimsBaseModel,
-    # ) -> Generator[Response, None, None]:
-    #     """Fetches all attachments for a record"""
-    #     if not record.attachments:
-    #         raise ValueError("Record initialized no attachments.")
-
-    #     for attachment in record.attachments():
-    #         yield attachment.slims_api.get(f"repo/{attachment.attm_pk}")
 
     @lru_cache(maxsize=None)
     def fetch_pk(self, table: SLIMSTABLES, *args, **kwargs) -> int | None:
@@ -470,6 +405,9 @@ class SlimsClient:
             An instance of the same type of model, with data from
             the resulting SLIMS record
         """
+        if model.pk is None:
+            raise ValueError("Cannot update model without a pk")
+
         fields_to_include = set(args) or None
         rtn = self.update(
             model._slims_table,

@@ -3,7 +3,7 @@
 """
 
 import logging
-from typing import Any
+from typing import ClassVar
 from datetime import datetime
 
 from pydantic import Field
@@ -17,7 +17,16 @@ logger = logging.getLogger()
 
 
 class SlimsBehaviorSessionContentEvent(SlimsBaseModel):
-    """Model for an instance of the Behavior Session ContentEvent"""
+    """Model for an instance of the Behavior Session ContentEvent
+
+    Examples
+    --------
+    >>> from aind_slims_api.core import SlimsClient
+    >>> from aind_slims_api.mouse import SlimsMouseContent
+    >>> client = SlimsClient()
+    >>> mouse = client.fetch_model(SlimsMouseContent, barcode="00000000")
+    >>> behavior_sessions = client.fetch_models(SlimsBehaviorSessionContentEvent, mouse_pk=mouse.pk, sort=["date"])
+    """
 
     pk: int | None = Field(default=None, alias="cnvn_pk")
     mouse_pk: int | None = Field(
@@ -36,55 +45,12 @@ class SlimsBehaviorSessionContentEvent(SlimsBaseModel):
     )
     software_version: str | None = Field(
         default=None, alias="cnvn_cf_softwareVersion")
-    date: datetime | None = Field(..., alias="cnvn_cf_scheduledDate")
+    date: datetime | None = Field(default=None, alias="cnvn_cf_scheduledDate")
     cnvn_fk_contentEventType: int = 10  # pk of Behavior Session ContentEvent
     _slims_table: SLIMSTABLES = "ContentEvent"
-
-
-SlimsSingletonFetchReturn = SlimsBaseModel | dict[str, Any] | None
-
-
-def _resolve_pk(
-    model: SlimsSingletonFetchReturn,
-    primary_key_name: str = "pk",
-) -> int:
-    """Utility function shared across read/write
-
-    Notes
-    -----
-    - TODO: Change return type of fetch_mouse_content to match pattern in
-     fetch_behavior_session_content_events, or the other way around?
-    - TODO: Move to core to have better centralized control of when references
-     are resolved
-    """
-    if isinstance(model, dict):
-        logger.warning("Extracting primary key from unvalidated dict.")
-        return model[primary_key_name]
-    elif isinstance(model, SlimsBaseModel):
-        return getattr(model, primary_key_name)
-    elif model is None:
-        raise ValueError(f"Cannot resolve primary key from {model}")
-    else:
-        raise ValueError("Unexpected type for model: %s" % type(model))
-
-
-def fetch_behavior_session_content_events(
-    client: SlimsClient,
-    mouse: SlimsMouseContent,
-) -> list[SlimsBehaviorSessionContentEvent]:
-    """Fetches behavior sessions for a mouse with labtracks id {mouse_name}
-
-    Returns
-    -------
-    list:
-        Validated SlimsBehaviorSessionContentEvent objects
-    """
-    return client.fetch_models(
-        SlimsBehaviorSessionContentEvent,
-        cnvn_fk_content=_resolve_pk(mouse),
-        cnvt_name="Behavior Session",
-        sort=["cnvn_cf_scheduledDate"],
-    )
+    _base_fetch_filters: ClassVar[dict[str, int | str]] = {
+        "cnvt_name": "Behavior Session",
+    }
 
 
 def write_behavior_session_content_events(
@@ -101,18 +67,14 @@ def write_behavior_session_content_events(
     - All supplied `behavior_sessions` will have their `mouse_name` field set
      to the value supplied as `mouse_name` to this function
     """
-    mouse_pk = _resolve_pk(mouse)
-    logger.debug(f"Mouse pk: {mouse_pk}")
-    instrument_pk = _resolve_pk(instrument)
-    logger.debug(f"Instrument pk: {instrument_pk}")
-    trainer_pks = [_resolve_pk(trainer) for trainer in trainers]
+    trainer_pks = [trainer.pk for trainer in trainers]
     logger.debug(f"Trainer pks: {trainer_pks}")
     added = []
     for behavior_session in behavior_sessions:
         updated = behavior_session.model_copy(
             update={
-                "mouse_pk": mouse_pk,
-                "instrument": instrument_pk,
+                "mouse_pk": mouse.pk,
+                "instrument": instrument.pk,
                 "trainers": trainer_pks,
             },
         )
@@ -120,3 +82,9 @@ def write_behavior_session_content_events(
         added.append(client.add_model(updated))
 
     return added
+
+
+if __name__ == "__main__":
+    from aind_slims_api import testmod
+
+    testmod()
