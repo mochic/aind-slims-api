@@ -170,18 +170,19 @@ class SlimsBaseModel(
     #         yield attachment.fetch_content()
 
 
-# class Attachment(SlimsBaseModel):
+class Attachment(SlimsBaseModel):
 
-#     pk: int = Field(..., alias="attm_pk")
-#     slims_api: Slims
-#     _slims_table: SLIMSTABLES = "Attachment"
+    pk: int = Field(..., alias="attm_pk")
+    name: str = Field(..., alias="attm_name")
+    # slims_api: Slims
+    _slims_table: SLIMSTABLES = "Attachment"
 
-#     class Config:
-#         arbitrary_types_allowed = True
+    # class Config:
+    #     arbitrary_types_allowed = True
 
-#     def fetch_content(self) -> Response:
-#         """Fetches the content of this attachment"""
-#         return self.slims_api.get(f"repo/{self.pk}")
+    # def fetch_content(self) -> Response:
+    #     """Fetches the content of this attachment"""
+    #     return self.slims_api.get(f"repo/{self.pk}")
 
     # attm_pk: SlimsColumn
     # attm_fk_content: SlimsColumn
@@ -196,6 +197,8 @@ SlimsBaseModelTypeVar = TypeVar("SlimsBaseModelTypeVar", bound=SlimsBaseModel)
 
 class SlimsClient:
     """Wrapper around slims-python-api client with convenience methods"""
+
+    db: Slims
 
     def __init__(self, url=None, username=None, password=None):
         """Create object and try to connect to database"""
@@ -273,6 +276,19 @@ class SlimsClient:
             raise ValueError(
                 f"Cannot resolve alias for {attr_name} on {model}")
 
+    def _validate_models(
+        self,
+        model_type: Type[SlimsBaseModelTypeVar],
+        records: list[SlimsRecord]
+    ) -> list[SlimsBaseModelTypeVar]:
+        validated = []
+        for record in records:
+            try:
+                validated.append(model_type.model_validate(record))
+            except ValidationError as e:
+                logger.error(f"SLIMS data validation failed, {repr(e)}")
+        return validated
+
     def fetch_models(
         self,
         model: Type[SlimsBaseModelTypeVar],
@@ -317,14 +333,7 @@ class SlimsClient:
             end=end,
             **resolved_kwargs,
         )
-        validated = []
-        for record in response:
-            try:
-                validated.append(model.model_validate(record))
-            except ValidationError as e:
-                logger.error(f"SLIMS data validation failed, {repr(e)}")
-
-        return validated
+        return self._validate_models(model, response)
 
     def fetch_model(
         self,
@@ -354,16 +363,30 @@ class SlimsClient:
             logger.debug(f"Found {len(records)} records for {model}.")
         return records[0]
 
-    def fetch_attachments_contents(
+    def fetch_attachments(
         self,
         record: SlimsBaseModel,
-    ) -> Generator[Response, None, None]:
-        """Fetches all attachments for a record"""
-        if not record.attachments:
-            raise ValueError("Record initialized no attachments.")
+    ) -> list[Attachment]:
+        return self._validate_models(
+            Attachment,
+            self.db.slims_api.get_entities(
+                f"attachment/{record._slims_table}/{record.pk}"
+            )
+        )
 
-        for attachment in record.attachments():
-            yield attachment.slims_api.get(f"repo/{attachment.attm_pk}")
+    def fetch_attachment_content(self, attachment: Attachment) -> Response:
+        return self.db.slims_api.get(f"repo/{attachment.pk}")
+
+    # def fetch_attachments_contents(
+    #     self,
+    #     record: SlimsBaseModel,
+    # ) -> Generator[Response, None, None]:
+    #     """Fetches all attachments for a record"""
+    #     if not record.attachments:
+    #         raise ValueError("Record initialized no attachments.")
+
+    #     for attachment in record.attachments():
+    #         yield attachment.slims_api.get(f"repo/{attachment.attm_pk}")
 
     @lru_cache(maxsize=None)
     def fetch_pk(self, table: SLIMSTABLES, *args, **kwargs) -> int | None:
