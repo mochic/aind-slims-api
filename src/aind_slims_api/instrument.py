@@ -11,7 +11,7 @@ logger = logging.getLogger()
 
 
 class SlimsInstrument(SlimsBaseModel):
-    """Model for an instance of the Behavior Session ContentEvent
+    """Model for a SLIMS instrument record.
 
     Examples
     --------

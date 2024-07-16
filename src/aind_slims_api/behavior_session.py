@@ -9,6 +9,9 @@ from datetime import datetime
 from pydantic import Field
 
 from aind_slims_api.core import SlimsBaseModel, SlimsClient, SLIMSTABLES
+from aind_slims_api.mouse import SlimsMouseContent
+from aind_slims_api.instrument import SlimsInstrument
+from aind_slims_api.user import SlimsUser
 
 logger = logging.getLogger()
 
@@ -31,7 +34,8 @@ class SlimsBehaviorSessionContentEvent(SlimsBaseModel):
     task_schema_version: str | None = Field(
         default=None, alias="cnvn_cf_taskSchemaVersion"
     )
-    software_version: str | None = Field(default=None, alias="cnvn_cf_softwareVersion")
+    software_version: str | None = Field(
+        default=None, alias="cnvn_cf_softwareVersion")
     date: datetime | None = Field(..., alias="cnvn_cf_scheduledDate")
     cnvn_fk_contentEventType: int = 10  # pk of Behavior Session ContentEvent
     _slims_table: SLIMSTABLES = "ContentEvent"
@@ -66,17 +70,14 @@ def _resolve_pk(
 
 def fetch_behavior_session_content_events(
     client: SlimsClient,
-    mouse: SlimsSingletonFetchReturn,
-) -> tuple[list[SlimsBehaviorSessionContentEvent], list[dict[str, Any]]]:
+    mouse: SlimsMouseContent,
+) -> list[SlimsBehaviorSessionContentEvent]:
     """Fetches behavior sessions for a mouse with labtracks id {mouse_name}
 
     Returns
     -------
-    tuple:
-        list:
-            Validated SlimsBehaviorSessionContentEvent objects
-        list:
-            Dictionaries representations of objects that failed validation
+    list:
+        Validated SlimsBehaviorSessionContentEvent objects
     """
     return client.fetch_models(
         SlimsBehaviorSessionContentEvent,
@@ -88,9 +89,9 @@ def fetch_behavior_session_content_events(
 
 def write_behavior_session_content_events(
     client: SlimsClient,
-    mouse: SlimsSingletonFetchReturn,
-    instrument: SlimsSingletonFetchReturn,
-    trainers: list[SlimsSingletonFetchReturn],
+    mouse: SlimsMouseContent,
+    instrument: SlimsInstrument,
+    trainers: list[SlimsUser],
     *behavior_sessions: SlimsBehaviorSessionContentEvent,
 ) -> list[SlimsBehaviorSessionContentEvent]:
     """Writes behavior sessions for a mouse with labtracks id {mouse_name}

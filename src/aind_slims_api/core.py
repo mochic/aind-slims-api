@@ -18,10 +18,11 @@ from pydantic import (
     field_serializer,
     field_validator,
 )
+from copy import deepcopy
 from pydantic.fields import FieldInfo
 import logging
 from typing import (
-    Any, Generator, Callable, Literal, Optional, Sequence, Type, TypeVar
+    Any, Generator, Callable, Literal, Optional, Sequence, Type, TypeVar,
 )
 from requests import Response
 from slims.slims import Slims, _SlimsApiException
@@ -97,6 +98,7 @@ class SlimsBaseModel(
     json_entity: dict = None
     attachments: Optional[Callable[[], Sequence[SlimsAttachment]]] = None
     _slims_table: SLIMSTABLES
+    _base_fetch_filters: dict[str, str | int]  # use for fetch_models, fetch_model
 
     @field_validator("*", mode="before")
     def _validate(cls, value, info: ValidationInfo):
@@ -310,10 +312,17 @@ class SlimsClient:
         -----
         - kwargs are mapped to field alias values
         """
-        resolved_kwargs = {
-            self.resolve_model_alias(model, name): value
-            for name, value in kwargs.items()
-        }
+        resolved_kwargs = deepcopy(model._base_fetch_filters)
+        for name, value in kwargs.items():
+            resolved_kwargs[self.resolve_model_alias(model, name)] = value
+        # resolved_kwargs = {
+        #     self.resolve_model_alias(model, name): value
+        #     for name, value in kwargs.items()
+        # }
+        # for filter_name, filter_value in model._base_fetch_filters:
+        #     if filter_name in resolved_kwargs:
+
+        #     resolved_kwargs[filter_name] = filter_value
         logger.debug("Resolved kwargs: %s", resolved_kwargs)
         resolved_sort: Optional[str | list[str]] = None
         if sort is not None:
