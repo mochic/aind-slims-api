@@ -12,7 +12,11 @@ logger = logging.getLogger()
 
 class SlimsMouseContent(SlimsBaseModel):
     """Model for an instance of the Mouse ContentType
-    
+
+    Properties
+    ----------
+    barcode: str, barcode of the mouse, filterable
+
     Examples
     --------
     >>> from aind_slims_api.core import SlimsClient
