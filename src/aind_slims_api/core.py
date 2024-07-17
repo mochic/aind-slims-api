@@ -143,6 +143,22 @@ class SlimsBaseModel(
 
 class SlimsAttachment(SlimsBaseModel):
 
+    """Model for a record in the Attachment table in SLIMS.
+
+    Examples
+    --------
+    >>> client = SlimsClient()
+    >>> rig_metadata_attachment = client.fetch_model(
+    ...  SlimsAttachment,
+    ...  name="rig323_EPHYS1_OPTO_2024-02-12.json"
+    ... )
+    >>> rig_metadata = client.fetch_attachment_content(
+    ...  rig_metadata_attachment
+    ... ).json()
+    >>> rig_metadata["rig_id"]
+    '323_EPHYS1_OPTO_2024-02-12'
+    """
+
     pk: int = Field(..., alias="attm_pk")
     name: str = Field(..., alias="attm_name")
     _slims_table = "Attachment"
@@ -237,6 +253,8 @@ class SlimsClient:
         model_type: Type[SlimsBaseModelTypeVar],
         records: list[SlimsRecord]
     ) -> list[SlimsBaseModelTypeVar]:
+        """Validate a list of SlimsBaseModel objects. Logs errors for records
+         that fail pydantic validation."""
         validated = []
         for record in records:
             try:
@@ -322,6 +340,7 @@ class SlimsClient:
         self,
         record: SlimsBaseModel,
     ) -> list[SlimsAttachment]:
+        """Fetch attachments for a given record."""
         return self._validate_models(
             SlimsAttachment,
             self.db.slims_api.get_entities(
@@ -330,6 +349,7 @@ class SlimsClient:
         )
 
     def fetch_attachment_content(self, attachment: SlimsAttachment) -> Response:
+        """Fetch attachment content for a given attachment."""
         return self.db.slims_api.get(f"repo/{attachment.pk}")
 
     @lru_cache(maxsize=None)
@@ -419,3 +439,9 @@ class SlimsClient:
             ),
         )
         return type(model).model_validate(rtn)
+
+
+if __name__ == "__main__":
+    from aind_slims_api import testmod
+
+    testmod()

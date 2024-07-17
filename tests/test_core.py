@@ -239,6 +239,8 @@ class TestSlimsClient(unittest.TestCase):
         mock_log.assert_called_once_with("SLIMS Update: Unit/31")
 
     def test_fetch_attachments(self):
+        """Tests fetch_attachments method success.
+        """
         # slims_api is dynamically added to slims client
         assert len(self.example_fetch_attachment_response) == 1
         with patch.object(
@@ -256,6 +258,8 @@ class TestSlimsClient(unittest.TestCase):
             assert len(attachments) == 1
 
     def test_fetch_attachment_content(self):
+        """Tests fetch_attachment_content method success.
+        """
         # slims_api is dynamically added to slims client
         with patch.object(
             self.example_client.db.slims_api,
@@ -271,6 +275,9 @@ class TestSlimsClient(unittest.TestCase):
 
     @patch("logging.Logger.error")
     def test__validate_model_invalid_model(self, mock_log: MagicMock):
+        """Tests _validate_model method with one invalid model and one valid
+         one.
+        """
         valid_data = deepcopy(
             self.example_fetch_unit_response[0].json_entity)
         invalid_data = deepcopy(
@@ -290,6 +297,9 @@ class TestSlimsClient(unittest.TestCase):
         assert mock_log.call_count == 1
 
     def test_resolve_model_alias_invalid(self):
+        """Tests resolve_model_alias method raises expected error with an
+         invalid alias name.
+        """
         with self.assertRaises(ValueError):
             self.example_client.resolve_model_alias(
                 SlimsUnit, "not_an_alias")
