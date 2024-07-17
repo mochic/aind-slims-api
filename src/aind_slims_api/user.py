@@ -1,4 +1,5 @@
 """Contains a model for a user, and a method for fetching it"""
+
 from typing import Optional
 
 from pydantic import Field

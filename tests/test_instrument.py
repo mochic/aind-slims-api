@@ -45,7 +45,8 @@ class TestInstrument(unittest.TestCase):
         """
         mock_fetch.return_value = self.example_response + self.example_response
         response = self.example_client.fetch_model(
-            SlimsInstrument, name="323_EPHYS1_OPTO")
+            SlimsInstrument, name="323_EPHYS1_OPTO"
+        )
         self.assertEqual(response.json_entity, self.example_response[0].json_entity)
 
 

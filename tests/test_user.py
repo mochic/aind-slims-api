@@ -38,8 +38,7 @@ class TestUser(unittest.TestCase):
     def test_fetch_user_content_success(self, mock_fetch: MagicMock):
         """Test fetch_user when successful"""
         mock_fetch.return_value = self.example_fetch_user_response
-        user_info = self.example_client.fetch_model(
-            SlimsUser, username="PersonA")
+        user_info = self.example_client.fetch_model(SlimsUser, username="PersonA")
         self.assertEqual(
             self.example_fetch_user_response[0].json_entity,
             user_info.json_entity,

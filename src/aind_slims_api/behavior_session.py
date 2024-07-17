@@ -3,14 +3,14 @@
 """
 
 import logging
-from typing import ClassVar
 from datetime import datetime
+from typing import ClassVar
 
 from pydantic import Field
 
 from aind_slims_api.core import SlimsBaseModel, SlimsClient
-from aind_slims_api.mouse import SlimsMouseContent
 from aind_slims_api.instrument import SlimsInstrument
+from aind_slims_api.mouse import SlimsMouseContent
 from aind_slims_api.user import SlimsUser
 
 logger = logging.getLogger()
@@ -25,7 +25,8 @@ class SlimsBehaviorSessionContentEvent(SlimsBaseModel):
     >>> from aind_slims_api.mouse import SlimsMouseContent
     >>> client = SlimsClient()
     >>> mouse = client.fetch_model(SlimsMouseContent, barcode="00000000")
-    >>> behavior_sessions = client.fetch_models(SlimsBehaviorSessionContentEvent, mouse_pk=mouse.pk, sort=["date"])
+    >>> behavior_sessions = client.fetch_models(SlimsBehaviorSessionContentEvent,
+    ...  mouse_pk=mouse.pk, sort=["date"])
     """
 
     pk: int | None = Field(default=None, alias="cnvn_pk")
@@ -47,8 +48,7 @@ class SlimsBehaviorSessionContentEvent(SlimsBaseModel):
     task_schema_version: str | None = Field(
         default=None, alias="cnvn_cf_taskSchemaVersion"
     )
-    software_version: str | None = Field(
-        default=None, alias="cnvn_cf_softwareVersion")
+    software_version: str | None = Field(default=None, alias="cnvn_cf_softwareVersion")
     date: datetime | None = Field(default=None, alias="cnvn_cf_scheduledDate")
     cnvn_fk_contentEventType: int = 10  # pk of Behavior Session ContentEvent
     _slims_table = "ContentEvent"

@@ -3,7 +3,7 @@
 import logging
 from typing import Annotated, ClassVar
 
-from pydantic import Field, BeforeValidator
+from pydantic import BeforeValidator, Field
 
 from aind_slims_api.core import SlimsBaseModel, UnitSpec
 

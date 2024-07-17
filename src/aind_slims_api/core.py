@@ -8,30 +8,26 @@ SlimsClient - Basic wrapper around slims-python-api client with convenience
     methods and integration with SlimsBaseModel subtypes
 """
 
+import logging
+from copy import deepcopy
 from datetime import datetime
 from functools import lru_cache
+from typing import ClassVar, Literal, Optional, Type, TypeVar
+
 from pydantic import (
-    Field,
     BaseModel,
-    ValidationInfo,
+    Field,
     ValidationError,
+    ValidationInfo,
     field_serializer,
     field_validator,
 )
-from copy import deepcopy
 from pydantic.fields import FieldInfo
-import logging
-from typing import (
-    ClassVar, Literal, Optional, Type,
-    TypeVar,
-)
 from requests import Response
-from slims.slims import Slims, _SlimsApiException
-from slims.internal import (
-    Column as SlimsColumn,
-    Record as SlimsRecord,
-)
 from slims.criteria import Criterion, conjunction, equals
+from slims.internal import Column as SlimsColumn
+from slims.internal import Record as SlimsRecord
+from slims.slims import Slims, _SlimsApiException
 
 from aind_slims_api import config
 
@@ -98,7 +94,8 @@ class SlimsBaseModel(
     pk: Optional[int] = None
     json_entity: Optional[dict] = None
     _slims_table: ClassVar[SLIMSTABLES]
-    _base_fetch_filters: ClassVar[dict[str, str]] = {}  # use for fetch_models, fetch_model
+    # base filters for model fetch
+    _base_fetch_filters: ClassVar[dict[str, str]] = {}
 
     @field_validator("*", mode="before")
     def _validate(cls, value, info: ValidationInfo):
@@ -142,7 +139,6 @@ class SlimsBaseModel(
 
 
 class SlimsAttachment(SlimsBaseModel):
-
     """Model for a record in the Attachment table in SLIMS.
 
     Examples
@@ -245,16 +241,13 @@ class SlimsClient:
             if field_name == attr_name and field_info.alias:
                 return field_info.alias
         else:
-            raise ValueError(
-                f"Cannot resolve alias for {attr_name} on {model}")
+            raise ValueError(f"Cannot resolve alias for {attr_name} on {model}")
 
     def _validate_models(
-        self,
-        model_type: Type[SlimsBaseModelTypeVar],
-        records: list[SlimsRecord]
+        self, model_type: Type[SlimsBaseModelTypeVar], records: list[SlimsRecord]
     ) -> list[SlimsBaseModelTypeVar]:
         """Validate a list of SlimsBaseModel objects. Logs errors for records
-         that fail pydantic validation."""
+        that fail pydantic validation."""
         validated = []
         for record in records:
             try:
@@ -294,8 +287,7 @@ class SlimsClient:
                 resolved_sort = self.resolve_model_alias(model, sort)
             else:
                 resolved_sort = [
-                    self.resolve_model_alias(model, sort_key)
-                    for sort_key in sort
+                    self.resolve_model_alias(model, sort_key) for sort_key in sort
                 ]
         logger.debug("Resolved sort: %s", resolved_sort)
         response = self.fetch(
@@ -315,7 +307,7 @@ class SlimsClient:
         sort: Optional[str | list[str]] = None,
         start: Optional[int] = None,
         end: Optional[int] = None,
-        **kwargs
+        **kwargs,
     ) -> SlimsBaseModelTypeVar:
         """Fetch a single record from SLIMS and return it as a validated
          SlimsBaseModel object.
@@ -345,7 +337,7 @@ class SlimsClient:
             SlimsAttachment,
             self.db.slims_api.get_entities(
                 f"attachment/{record._slims_table}/{record.pk}"
-            )
+            ),
         )
 
     def fetch_attachment_content(self, attachment: SlimsAttachment) -> Response:

@@ -39,7 +39,8 @@ class TestMouse(unittest.TestCase):
         """Test fetch_mouse_content when successful"""
         mock_fetch.return_value = self.example_fetch_mouse_response
         mouse_details = self.example_client.fetch_model(
-            SlimsMouseContent, barcode="123456")
+            SlimsMouseContent, barcode="123456"
+        )
         self.assertEqual(
             self.example_fetch_mouse_response[0].json_entity, mouse_details.json_entity
         )

@@ -3,22 +3,20 @@
 import json
 import os
 import unittest
+from datetime import datetime
 from pathlib import Path
 from unittest.mock import MagicMock, patch
-from datetime import datetime
 
 from slims.internal import Record
 
-from aind_slims_api.core import SlimsClient
-from aind_slims_api.mouse import (
-    SlimsMouseContent,
-)
-from aind_slims_api.user import SlimsUser
-from aind_slims_api.instrument import SlimsInstrument
 from aind_slims_api.behavior_session import (
-    write_behavior_session_content_events,
     SlimsBehaviorSessionContentEvent,
+    write_behavior_session_content_events,
 )
+from aind_slims_api.core import SlimsClient
+from aind_slims_api.instrument import SlimsInstrument
+from aind_slims_api.mouse import SlimsMouseContent
+from aind_slims_api.user import SlimsUser
 
 RESOURCES_DIR = Path(os.path.dirname(os.path.realpath(__file__))) / "resources"
 
@@ -114,7 +112,9 @@ class TestBehaviorSession(unittest.TestCase):
         )
 
     @patch("slims.slims.Slims.fetch")
-    def test_fetch_behavior_session_content_events_success_sort_list(self, mock_fetch: MagicMock):
+    def test_fetch_behavior_session_content_events_success_sort_list(
+        self, mock_fetch: MagicMock
+    ):
         """Test fetch_behavior_session_content_events when successful"""
         mock_fetch.return_value = self.example_response
         validated = self.example_client.fetch_models(
@@ -141,9 +141,7 @@ class TestBehaviorSession(unittest.TestCase):
             [self.example_trainer],
             *self.example_behavior_sessions,
         )
-        self.assertTrue(
-            all((item.mouse_pk == self.example_mouse.pk for item in added))
-        )
+        self.assertTrue(all((item.mouse_pk == self.example_mouse.pk for item in added)))
         self.assertTrue(len(added) == len(self.example_behavior_sessions))
 
 

@@ -5,13 +5,13 @@ import os
 import unittest
 from copy import deepcopy
 from pathlib import Path
-from requests import Response
 from unittest.mock import MagicMock, patch
 
+from requests import Response
 from slims.criteria import conjunction, equals
 from slims.internal import Record, _SlimsApiException
 
-from aind_slims_api.core import SlimsClient, SlimsAttachment
+from aind_slims_api.core import SlimsAttachment, SlimsClient
 from aind_slims_api.unit import SlimsUnit
 
 RESOURCES_DIR = Path(os.path.dirname(os.path.realpath(__file__))) / "resources"
@@ -50,7 +50,8 @@ class TestSlimsClient(unittest.TestCase):
         cls.example_fetch_mouse_response = get_response("example_fetch_mouse_response")
         cls.example_fetch_user_response = get_response("example_fetch_user_response")
         cls.example_fetch_attachment_response = get_response(
-            "example_fetch_attachments_response.json_entity")
+            "example_fetch_attachments_response.json_entity"
+        )
 
     def test_rest_link(self):
         """Tests rest_link method with both queries and no queries."""
@@ -239,27 +240,27 @@ class TestSlimsClient(unittest.TestCase):
         mock_log.assert_called_once_with("SLIMS Update: Unit/31")
 
     def test_fetch_attachments(self):
-        """Tests fetch_attachments method success.
-        """
+        """Tests fetch_attachments method success."""
         # slims_api is dynamically added to slims client
         assert len(self.example_fetch_attachment_response) == 1
         with patch.object(
             self.example_client.db.slims_api,
             "get_entities",
-            return_value=self.example_fetch_attachment_response
+            return_value=self.example_fetch_attachment_response,
         ):
-            unit = SlimsUnit.model_validate(Record(
-                json_entity=self.example_fetch_unit_response[0].json_entity,
-                slims_api=self.example_client.db.slims_api
-            ))
+            unit = SlimsUnit.model_validate(
+                Record(
+                    json_entity=self.example_fetch_unit_response[0].json_entity,
+                    slims_api=self.example_client.db.slims_api,
+                )
+            )
             attachments = self.example_client.fetch_attachments(
                 unit,
             )
             assert len(attachments) == 1
 
     def test_fetch_attachment_content(self):
-        """Tests fetch_attachment_content method success.
-        """
+        """Tests fetch_attachment_content method success."""
         # slims_api is dynamically added to slims client
         with patch.object(
             self.example_client.db.slims_api,
@@ -276,33 +277,33 @@ class TestSlimsClient(unittest.TestCase):
     @patch("logging.Logger.error")
     def test__validate_model_invalid_model(self, mock_log: MagicMock):
         """Tests _validate_model method with one invalid model and one valid
-         one.
+        one.
         """
-        valid_data = deepcopy(
-            self.example_fetch_unit_response[0].json_entity)
-        invalid_data = deepcopy(
-            self.example_fetch_unit_response[0].json_entity)
+        valid_data = deepcopy(self.example_fetch_unit_response[0].json_entity)
+        invalid_data = deepcopy(self.example_fetch_unit_response[0].json_entity)
         invalid_data["columns"][0]["value"] = 1
-        validated = self.example_client._validate_models(SlimsUnit, [
-            Record(
-                json_entity=valid_data,
-                slims_api=self.example_client.db.slims_api,
-            ),
-            Record(
-                json_entity=invalid_data,
-                slims_api=self.example_client.db.slims_api,
-            ),
-        ])
+        validated = self.example_client._validate_models(
+            SlimsUnit,
+            [
+                Record(
+                    json_entity=valid_data,
+                    slims_api=self.example_client.db.slims_api,
+                ),
+                Record(
+                    json_entity=invalid_data,
+                    slims_api=self.example_client.db.slims_api,
+                ),
+            ],
+        )
         assert len(validated) == 1
         assert mock_log.call_count == 1
 
     def test_resolve_model_alias_invalid(self):
         """Tests resolve_model_alias method raises expected error with an
-         invalid alias name.
+        invalid alias name.
         """
         with self.assertRaises(ValueError):
-            self.example_client.resolve_model_alias(
-                SlimsUnit, "not_an_alias")
+            self.example_client.resolve_model_alias(SlimsUnit, "not_an_alias")
 
 
 if __name__ == "__main__":

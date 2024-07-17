@@ -23,8 +23,8 @@ def testmod(**testmod_kwargs):
             testmod()
 
     """
-    import logging
     import doctest
+    import logging
 
     logging.basicConfig(level=logging.DEBUG)
 
