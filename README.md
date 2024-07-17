@@ -20,6 +20,13 @@ To develop the code, run
 pip install -e .[dev]
 ```
 
+## Usage
+
+### VScode
+![](example-usage.gif)
+
+Requires the pylance extension to be installed.
+
 ## Contributing
 
 ### Linters and testing
