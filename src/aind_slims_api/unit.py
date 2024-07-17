@@ -5,7 +5,7 @@ from typing import Optional
 
 from pydantic import Field
 
-from aind_slims_api.core import SlimsBaseModel, SLIMSTABLES
+from aind_slims_api.core import SlimsBaseModel
 
 logger = logging.getLogger()
 
@@ -17,4 +17,4 @@ class SlimsUnit(SlimsBaseModel):
     abbreviation: Optional[str] = Field("", alias="unit_abbreviation")
     pk: int = Field(..., alias="unit_pk")
 
-    _slims_table: SLIMSTABLES = "Unit"
+    _slims_table = "Unit"

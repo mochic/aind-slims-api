@@ -97,8 +97,8 @@ class SlimsBaseModel(
 
     pk: Optional[int] = None
     json_entity: Optional[dict] = None
-    _slims_table: SLIMSTABLES
-    _base_fetch_filters: ClassVar[dict[str, str | int]] = {}  # use for fetch_models, fetch_model
+    _slims_table: ClassVar[SLIMSTABLES]
+    _base_fetch_filters: ClassVar[dict[str, str]] = {}  # use for fetch_models, fetch_model
 
     @field_validator("*", mode="before")
     def _validate(cls, value, info: ValidationInfo):
@@ -141,11 +141,11 @@ class SlimsBaseModel(
     # TODO: Add Table - need Record.json_entity['tableName']
 
 
-class Attachment(SlimsBaseModel):
+class SlimsAttachment(SlimsBaseModel):
 
     pk: int = Field(..., alias="attm_pk")
     name: str = Field(..., alias="attm_name")
-    _slims_table: SLIMSTABLES = "Attachment"
+    _slims_table = "Attachment"
 
 
 SlimsBaseModelTypeVar = TypeVar("SlimsBaseModelTypeVar", bound=SlimsBaseModel)
@@ -281,7 +281,7 @@ class SlimsClient:
                 ]
         logger.debug("Resolved sort: %s", resolved_sort)
         response = self.fetch(
-            model._slims_table.default,  # TODO: consider changing fetch method
+            model._slims_table,  # TODO: consider changing fetch method
             *args,
             sort=resolved_sort,
             start=start,
@@ -321,15 +321,15 @@ class SlimsClient:
     def fetch_attachments(
         self,
         record: SlimsBaseModel,
-    ) -> list[Attachment]:
+    ) -> list[SlimsAttachment]:
         return self._validate_models(
-            Attachment,
+            SlimsAttachment,
             self.db.slims_api.get_entities(
                 f"attachment/{record._slims_table}/{record.pk}"
             )
         )
 
-    def fetch_attachment_content(self, attachment: Attachment) -> Response:
+    def fetch_attachment_content(self, attachment: SlimsAttachment) -> Response:
         return self.db.slims_api.get(f"repo/{attachment.pk}")
 
     @lru_cache(maxsize=None)

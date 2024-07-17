@@ -4,7 +4,7 @@ import logging
 
 from pydantic import Field
 
-from aind_slims_api.core import SlimsBaseModel, SLIMSTABLES
+from aind_slims_api.core import SlimsBaseModel
 
 logger = logging.getLogger()
 
@@ -25,7 +25,7 @@ class SlimsInstrument(SlimsBaseModel):
         description="The name of the instrument",
     )
     pk: int = Field(..., alias="nstr_pk")
-    _slims_table: SLIMSTABLES = "Instrument"
+    _slims_table = "Instrument"
 
     # todo add more useful fields
 

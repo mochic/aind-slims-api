@@ -8,7 +8,7 @@ from datetime import datetime
 
 from pydantic import Field
 
-from aind_slims_api.core import SlimsBaseModel, SlimsClient, SLIMSTABLES
+from aind_slims_api.core import SlimsBaseModel, SlimsClient
 from aind_slims_api.mouse import SlimsMouseContent
 from aind_slims_api.instrument import SlimsInstrument
 from aind_slims_api.user import SlimsUser
@@ -30,7 +30,11 @@ class SlimsBehaviorSessionContentEvent(SlimsBaseModel):
 
     pk: int | None = Field(default=None, alias="cnvn_pk")
     mouse_pk: int | None = Field(
-        default=None, alias="cnvn_fk_content"
+        default=None,
+        alias="cnvn_fk_content",
+        description=(
+            "The primary key of the mouse associated with this behavior session."
+        ),
     )  # used as reference to mouse
     notes: str | None = Field(default=None, alias="cnvn_cf_notes")
     task_stage: str | None = Field(default=None, alias="cnvn_cf_taskStage")
@@ -47,8 +51,8 @@ class SlimsBehaviorSessionContentEvent(SlimsBaseModel):
         default=None, alias="cnvn_cf_softwareVersion")
     date: datetime | None = Field(default=None, alias="cnvn_cf_scheduledDate")
     cnvn_fk_contentEventType: int = 10  # pk of Behavior Session ContentEvent
-    _slims_table: SLIMSTABLES = "ContentEvent"
-    _base_fetch_filters: ClassVar[dict[str, int | str]] = {
+    _slims_table = "ContentEvent"
+    _base_fetch_filters: ClassVar[dict[str, str]] = {
         "cnvt_name": "Behavior Session",
     }
 

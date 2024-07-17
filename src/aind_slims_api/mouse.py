@@ -3,9 +3,9 @@
 import logging
 from typing import Annotated, ClassVar
 
-from pydantic import Field, BeforeValidator, ValidationError
+from pydantic import Field, BeforeValidator
 
-from aind_slims_api.core import SlimsBaseModel, SlimsClient, UnitSpec, SLIMSTABLES
+from aind_slims_api.core import SlimsBaseModel, UnitSpec
 
 logger = logging.getLogger()
 
@@ -30,8 +30,8 @@ class SlimsMouseContent(SlimsBaseModel):
     barcode: str = Field(..., alias="cntn_barCode")
     pk: int = Field(..., alias="cntn_pk")
 
-    _slims_table: SLIMSTABLES = "Content"
-    _base_fetch_filters: ClassVar[dict[str, int | str]] = {
+    _slims_table = "Content"
+    _base_fetch_filters: ClassVar[dict[str, str]] = {
         "cntp_name": "Mouse",
     }
 
@@ -50,37 +50,6 @@ class SlimsMouseContent(SlimsBaseModel):
     # cntn_cf_genotype: SlimsColumn
     # cntn_cf_labtracksId: SlimsColumn
     # cntn_cf_parentBarcode: SlimsColumn
-
-
-def fetch_mouse_content(
-    client: SlimsClient,
-    mouse_name: str,
-) -> SlimsMouseContent | dict | None:
-    """Fetches mouse information for a mouse with labtracks id {mouse_name}"""
-    mice = client.fetch(
-        "Content",
-        cntp_name="Mouse",
-        cntn_barCode=mouse_name,
-    )
-
-    if len(mice) > 0:
-        mouse_details = mice[0]
-        if len(mice) > 1:
-            logger.warning(
-                f"Warning, Multiple mice in SLIMS with barcode "
-                f"{mouse_name}, using pk={mouse_details.cntn_pk.value}"
-            )
-    else:
-        logger.warning("Warning, Mouse not in SLIMS")
-        return None
-
-    try:
-        mouse = SlimsMouseContent.model_validate(mouse_details)
-    except ValidationError as e:
-        logger.error(f"SLIMS data validation failed, {repr(e)}")
-        return mouse_details.json_entity
-
-    return mouse
 
 
 if __name__ == "__main__":

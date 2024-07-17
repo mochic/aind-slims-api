@@ -3,7 +3,7 @@ from typing import Optional
 
 from pydantic import Field
 
-from aind_slims_api.core import SlimsBaseModel, SLIMSTABLES
+from aind_slims_api.core import SlimsBaseModel
 
 
 # TODO: Tighten this up once users are more commonly used
@@ -12,7 +12,7 @@ class SlimsUser(SlimsBaseModel):
 
     >>> from aind_slims_api.core import SlimsClient
     >>> client = SlimsClient()
-    >>> user = client.fetch_model(SlimsUser, "LisaK")
+    >>> user = client.fetch_model(SlimsUser, username="LKim")
     """
 
     username: str = Field(..., alias="user_userName")
@@ -22,7 +22,7 @@ class SlimsUser(SlimsBaseModel):
     email: Optional[str] = Field("", alias="user_email")
     pk: int = Field(..., alias="user_pk")
 
-    _slims_table: SLIMSTABLES = "User"
+    _slims_table = "User"
 
 
 if __name__ == "__main__":

@@ -16,7 +16,6 @@ from aind_slims_api.mouse import (
 from aind_slims_api.user import SlimsUser
 from aind_slims_api.instrument import SlimsInstrument
 from aind_slims_api.behavior_session import (
-    fetch_behavior_session_content_events,
     write_behavior_session_content_events,
     SlimsBehaviorSessionContentEvent,
 )
@@ -104,51 +103,29 @@ class TestBehaviorSession(unittest.TestCase):
     def test_fetch_behavior_session_content_events_success(self, mock_fetch: MagicMock):
         """Test fetch_behavior_session_content_events when successful"""
         mock_fetch.return_value = self.example_response
-        validated, unvalidated = fetch_behavior_session_content_events(
-            self.example_client, self.example_mouse
+        validated = self.example_client.fetch_models(
+            SlimsBehaviorSessionContentEvent,
+            mouse_pk=self.example_mouse.pk,
+            sort="date",
         )
-        ret_entities = [item.json_entity for item in validated] + [
-            item["json_entity"] for item in unvalidated
-        ]
         self.assertEqual(
             [item.json_entity for item in self.example_response],
-            ret_entities,
+            [item.json_entity for item in validated],
         )
 
     @patch("slims.slims.Slims.fetch")
-    def test_fetch_behavior_session_content_events_success_unvalidated(
-        self, mock_fetch: MagicMock
-    ):
+    def test_fetch_behavior_session_content_events_success_sort_list(self, mock_fetch: MagicMock):
         """Test fetch_behavior_session_content_events when successful"""
         mock_fetch.return_value = self.example_response
-        validated, unvalidated = fetch_behavior_session_content_events(
-            self.example_client, self.example_mouse_response[0].json_entity
+        validated = self.example_client.fetch_models(
+            SlimsBehaviorSessionContentEvent,
+            mouse_pk=self.example_mouse.pk,
+            sort=["date"],
         )
-        ret_entities = [item.json_entity for item in validated] + [
-            item["json_entity"] for item in unvalidated
-        ]
         self.assertEqual(
             [item.json_entity for item in self.example_response],
-            ret_entities,
+            [item.json_entity for item in validated],
         )
-
-    @patch("slims.slims.Slims.fetch")
-    def test_fetch_behavior_session_content_events_failure_none(
-        self, mock_fetch: MagicMock
-    ):
-        """Test fetch_behavior_session_content_events when supplied with None"""
-        mock_fetch.return_value = self.example_response
-        with self.assertRaises(ValueError):
-            fetch_behavior_session_content_events(self.example_client, None)
-
-    @patch("slims.slims.Slims.fetch")
-    def test_fetch_behavior_session_content_events_failure_bad_value(
-        self, mock_fetch: MagicMock
-    ):
-        """Test fetch_behavior_session_content_events when supplied with None"""
-        mock_fetch.return_value = self.example_response
-        with self.assertRaises(ValueError):
-            fetch_behavior_session_content_events(self.example_client, 1)
 
     @patch("slims.slims.Slims.add")
     def test_write_behavior_session_content_events_success(
