@@ -9,14 +9,12 @@ from unittest.mock import MagicMock, patch
 
 from slims.internal import Record
 
-from aind_slims_api.behavior_session import (
-    SlimsBehaviorSessionContentEvent,
-    write_behavior_session_content_events,
-)
 from aind_slims_api.core import SlimsClient
-from aind_slims_api.instrument import SlimsInstrument
-from aind_slims_api.mouse import SlimsMouseContent
-from aind_slims_api.user import SlimsUser
+from aind_slims_api.models.behavior_session import SlimsBehaviorSession
+from aind_slims_api.models.instrument import SlimsInstrument
+from aind_slims_api.models.mouse import SlimsMouseContent
+from aind_slims_api.models.user import SlimsUser
+from aind_slims_api.write_models import write_behavior_session_content_events
 
 RESOURCES_DIR = Path(os.path.dirname(os.path.realpath(__file__))) / "resources"
 
@@ -27,7 +25,7 @@ class TestBehaviorSession(unittest.TestCase):
     example_client: SlimsClient
     example_response: list[Record]
     example_mouse_response: list[Record]
-    example_behavior_sessions: list[SlimsBehaviorSessionContentEvent]
+    example_behavior_sessions: list[SlimsBehaviorSession]
     example_mouse: SlimsMouseContent
     example_write_sessions_response: list[Record]
     example_instrument: SlimsInstrument
@@ -77,7 +75,7 @@ class TestBehaviorSession(unittest.TestCase):
             cntn_cf_baselineWeight=None,
         )
         cls.example_behavior_sessions = [
-            SlimsBehaviorSessionContentEvent(
+            SlimsBehaviorSession(
                 cnvn_cf_notes="Test notes",
                 cnvn_cf_taskStage="Test stage",
                 cnvn_cf_task="Test task",
@@ -102,7 +100,7 @@ class TestBehaviorSession(unittest.TestCase):
         """Test fetch_behavior_session_content_events when successful"""
         mock_fetch.return_value = self.example_response
         validated = self.example_client.fetch_models(
-            SlimsBehaviorSessionContentEvent,
+            SlimsBehaviorSession,
             mouse_pk=self.example_mouse.pk,
             sort="date",
         )
@@ -118,7 +116,7 @@ class TestBehaviorSession(unittest.TestCase):
         """Test fetch_behavior_session_content_events when successful"""
         mock_fetch.return_value = self.example_response
         validated = self.example_client.fetch_models(
-            SlimsBehaviorSessionContentEvent,
+            SlimsBehaviorSession,
             mouse_pk=self.example_mouse.pk,
             sort=["date"],
         )

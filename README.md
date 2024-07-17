@@ -25,7 +25,7 @@ pip install -e .[dev]
 ### VScode
 ![](example-usage.gif)
 
-Requires the pylance extension to be installed.
+Requires the [pylance extension](https://marketplace.visualstudio.com/items?itemName=ms-python.vscode-pylance) to be installed for similar functionality.
 
 ## Contributing
 

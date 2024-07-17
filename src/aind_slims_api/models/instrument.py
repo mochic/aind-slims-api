@@ -1,12 +1,8 @@
 """Contains a model for the instrument content, and a method for fetching it"""
 
-import logging
-
 from pydantic import Field
 
-from aind_slims_api.core import SlimsBaseModel
-
-logger = logging.getLogger()
+from aind_slims_api.models.base import SlimsBaseModel
 
 
 class SlimsInstrument(SlimsBaseModel):

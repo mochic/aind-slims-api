@@ -7,7 +7,8 @@ from typing import Annotated
 from pydantic import Field
 from slims.internal import Column, Record
 
-from aind_slims_api.core import SlimsBaseModel, UnitSpec
+from aind_slims_api.core import SlimsBaseModel
+from aind_slims_api.models.utils import UnitSpec
 
 
 class TestSlimsModel(unittest.TestCase):

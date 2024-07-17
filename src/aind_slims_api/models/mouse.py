@@ -1,13 +1,11 @@
 """Contains a model for the mouse content, and a method for fetching it"""
 
-import logging
 from typing import Annotated, ClassVar
 
 from pydantic import BeforeValidator, Field
 
-from aind_slims_api.core import SlimsBaseModel, UnitSpec
-
-logger = logging.getLogger()
+from aind_slims_api.models.base import SlimsBaseModel
+from aind_slims_api.models.utils import UnitSpec
 
 
 class SlimsMouseContent(SlimsBaseModel):

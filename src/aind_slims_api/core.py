@@ -10,154 +10,22 @@ SlimsClient - Basic wrapper around slims-python-api client with convenience
 
 import logging
 from copy import deepcopy
-from datetime import datetime
 from functools import lru_cache
-from typing import ClassVar, Literal, Optional, Type, TypeVar
+from typing import Optional, Type, TypeVar
 
-from pydantic import (
-    BaseModel,
-    Field,
-    ValidationError,
-    ValidationInfo,
-    field_serializer,
-    field_validator,
-)
-from pydantic.fields import FieldInfo
+from pydantic import ValidationError
 from requests import Response
 from slims.criteria import Criterion, conjunction, equals
-from slims.internal import Column as SlimsColumn
 from slims.internal import Record as SlimsRecord
 from slims.slims import Slims, _SlimsApiException
 
 from aind_slims_api import config
-
-logger = logging.getLogger()
-
-# List of slims tables manually accessed, there are many more
-SLIMSTABLES = Literal[
-    "Attachment",
-    "Project",
-    "Content",
-    "ContentEvent",
-    "Unit",
-    "Result",
-    "Test",
-    "User",
-    "Groups",
-    "Instrument",
-    "Unit",
-]
+from aind_slims_api.models.attachment import SlimsAttachment
+from aind_slims_api.models.base import SlimsBaseModel
+from aind_slims_api.types import SLIMSTABLES
 
 
-class UnitSpec:
-    """Used in type annotation metadata to specify units"""
-
-    units: list[str]
-    preferred_unit: Optional[str] = None
-
-    def __init__(self, *args, preferred_unit=None):
-        """Set list of acceptable units from args, and preferred_unit"""
-        self.units = args
-        if len(self.units) == 0:
-            raise ValueError("One or more units must be specified")
-        if preferred_unit is None:
-            self.preferred_unit = self.units[0]
-
-
-def _find_unit_spec(field: FieldInfo) -> UnitSpec | None:
-    """Given a Pydantic FieldInfo, find the UnitSpec in its metadata"""
-    metadata = field.metadata
-    for m in metadata:
-        if isinstance(m, UnitSpec):
-            return m
-    return None
-
-
-class SlimsBaseModel(
-    BaseModel,
-    from_attributes=True,
-    validate_assignment=True,
-):
-    """Pydantic model to represent a SLIMS record.
-    Subclass with fields matching those in the SLIMS record.
-
-    For Quantities, specify acceptable units like so:
-
-        class MyModel(SlimsBaseModel):
-            myfield: Annotated[float | None, UnitSpec("g","kg")]
-
-        Quantities will be serialized using the first unit passed
-
-    Datetime fields will be serialized to an integer ms timestamp
-    """
-
-    pk: Optional[int] = None
-    json_entity: Optional[dict] = None
-    _slims_table: ClassVar[SLIMSTABLES]
-    # base filters for model fetch
-    _base_fetch_filters: ClassVar[dict[str, str]] = {}
-
-    @field_validator("*", mode="before")
-    def _validate(cls, value, info: ValidationInfo):
-        """Validates a field, accounts for Quantities"""
-        if isinstance(value, SlimsColumn):
-            if value.datatype == "QUANTITY":
-                unit_spec = _find_unit_spec(cls.model_fields[info.field_name])
-                if unit_spec is None:
-                    msg = (
-                        f'Quantity field "{info.field_name}"'
-                        "must be annotated with a UnitSpec"
-                    )
-                    raise TypeError(msg)
-                if value.unit not in unit_spec.units:
-                    msg = (
-                        f'Unexpected unit "{value.unit}" for field '
-                        f"{info.field_name}, Expected {unit_spec.units}"
-                    )
-                    raise ValueError(msg)
-            return value.value
-        else:
-            return value
-
-    @field_serializer("*")
-    def _serialize(self, field, info):
-        """Serialize a field, accounts for Quantities and datetime"""
-        unit_spec = _find_unit_spec(self.model_fields[info.field_name])
-        if unit_spec and field is not None:
-            quantity = {
-                "amount": field,
-                "unit_display": unit_spec.preferred_unit,
-            }
-            return quantity
-        elif isinstance(field, datetime):
-            return int(field.timestamp() * 10**3)
-        else:
-            return field
-
-    # TODO: Add links - need Record.json_entity['links']['self']
-    # TODO: Add Table - need Record.json_entity['tableName']
-
-
-class SlimsAttachment(SlimsBaseModel):
-    """Model for a record in the Attachment table in SLIMS.
-
-    Examples
-    --------
-    >>> client = SlimsClient()
-    >>> rig_metadata_attachment = client.fetch_model(
-    ...  SlimsAttachment,
-    ...  name="rig323_EPHYS1_OPTO_2024-02-12.json"
-    ... )
-    >>> rig_metadata = client.fetch_attachment_content(
-    ...  rig_metadata_attachment
-    ... ).json()
-    >>> rig_metadata["rig_id"]
-    '323_EPHYS1_OPTO_2024-02-12'
-    """
-
-    pk: int = Field(..., alias="attm_pk")
-    name: str = Field(..., alias="attm_name")
-    _slims_table = "Attachment"
+logger = logging.getLogger(__name__)
 
 
 SlimsBaseModelTypeVar = TypeVar("SlimsBaseModelTypeVar", bound=SlimsBaseModel)
@@ -431,9 +299,3 @@ class SlimsClient:
             ),
         )
         return type(model).model_validate(rtn)
-
-
-if __name__ == "__main__":
-    from aind_slims_api import testmod
-
-    testmod()

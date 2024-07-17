@@ -1,13 +1,10 @@
 """Contains a model for a unit"""
 
-import logging
 from typing import Optional
 
 from pydantic import Field
 
-from aind_slims_api.core import SlimsBaseModel
-
-logger = logging.getLogger()
+from aind_slims_api.models.base import SlimsBaseModel
 
 
 class SlimsUnit(SlimsBaseModel):

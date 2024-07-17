@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 from slims.internal import Record
 
 from aind_slims_api.core import SlimsClient
-from aind_slims_api.user import SlimsUser
+from aind_slims_api.models.user import SlimsUser
 
 RESOURCES_DIR = Path(os.path.dirname(os.path.realpath(__file__))) / "resources"
 

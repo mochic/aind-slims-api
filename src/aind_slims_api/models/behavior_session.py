@@ -8,24 +8,21 @@ from typing import ClassVar
 
 from pydantic import Field
 
-from aind_slims_api.core import SlimsBaseModel, SlimsClient
-from aind_slims_api.instrument import SlimsInstrument
-from aind_slims_api.mouse import SlimsMouseContent
-from aind_slims_api.user import SlimsUser
+from aind_slims_api.models.base import SlimsBaseModel
 
 logger = logging.getLogger()
 
 
-class SlimsBehaviorSessionContentEvent(SlimsBaseModel):
+class SlimsBehaviorSession(SlimsBaseModel):
     """Model for an instance of the Behavior Session ContentEvent
 
     Examples
     --------
-    >>> from aind_slims_api.core import SlimsClient
-    >>> from aind_slims_api.mouse import SlimsMouseContent
+    >>> from aind_slims_api import SlimsClient
+    >>> from aind_slims_api.models import SlimsMouseContent
     >>> client = SlimsClient()
     >>> mouse = client.fetch_model(SlimsMouseContent, barcode="00000000")
-    >>> behavior_sessions = client.fetch_models(SlimsBehaviorSessionContentEvent,
+    >>> behavior_sessions = client.fetch_models(SlimsBehaviorSession,
     ...  mouse_pk=mouse.pk, sort=["date"])
     """
 
@@ -55,37 +52,6 @@ class SlimsBehaviorSessionContentEvent(SlimsBaseModel):
     _base_fetch_filters: ClassVar[dict[str, str]] = {
         "cnvt_name": "Behavior Session",
     }
-
-
-def write_behavior_session_content_events(
-    client: SlimsClient,
-    mouse: SlimsMouseContent,
-    instrument: SlimsInstrument,
-    trainers: list[SlimsUser],
-    *behavior_sessions: SlimsBehaviorSessionContentEvent,
-) -> list[SlimsBehaviorSessionContentEvent]:
-    """Writes behavior sessions for a mouse with labtracks id {mouse_name}
-
-    Notes
-    -----
-    - All supplied `behavior_sessions` will have their `mouse_name` field set
-     to the value supplied as `mouse_name` to this function
-    """
-    trainer_pks = [trainer.pk for trainer in trainers]
-    logger.debug(f"Trainer pks: {trainer_pks}")
-    added = []
-    for behavior_session in behavior_sessions:
-        updated = behavior_session.model_copy(
-            update={
-                "mouse_pk": mouse.pk,
-                "instrument": instrument.pk,
-                "trainers": trainer_pks,
-            },
-        )
-        logger.debug(f"Resolved behavior session: {updated}")
-        added.append(client.add_model(updated))
-
-    return added
 
 
 if __name__ == "__main__":
