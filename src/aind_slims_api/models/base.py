@@ -9,7 +9,7 @@ from pydantic import BaseModel, ValidationInfo, field_serializer, field_validato
 from slims.internal import Column as SlimsColumn
 
 from aind_slims_api.models.utils import _find_unit_spec
-from aind_slims_api.types import SLIMSTABLES
+from aind_slims_api.types import SLIMS_TABLES
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ class SlimsBaseModel(
 
     pk: Optional[int] = None
     json_entity: Optional[dict] = None
-    _slims_table: ClassVar[SLIMSTABLES]
+    _slims_table: ClassVar[SLIMS_TABLES]
     # base filters for model fetch
     _base_fetch_filters: ClassVar[dict[str, str]] = {}
 

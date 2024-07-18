@@ -22,7 +22,7 @@ from slims.slims import Slims, _SlimsApiException
 from aind_slims_api import config
 from aind_slims_api.models.attachment import SlimsAttachment
 from aind_slims_api.models.base import SlimsBaseModel
-from aind_slims_api.types import SLIMSTABLES
+from aind_slims_api.types import SLIMS_TABLES
 from aind_slims_api.exceptions import SlimsRecordNotFound
 
 
@@ -58,7 +58,7 @@ class SlimsClient:
 
     def fetch(
         self,
-        table: SLIMSTABLES,
+        table: SLIMS_TABLES,
         *args,
         sort: Optional[str | list[str]] = None,
         start: Optional[int] = None,
@@ -218,7 +218,7 @@ class SlimsClient:
         return self.db.slims_api.get(f"repo/{attachment.pk}")
 
     @lru_cache(maxsize=None)
-    def fetch_pk(self, table: SLIMSTABLES, *args, **kwargs) -> int | None:
+    def fetch_pk(self, table: SLIMS_TABLES, *args, **kwargs) -> int | None:
         """SlimsClient.fetch but returns the pk of the first returned record"""
         records = self.fetch(table, *args, **kwargs)
         if len(records) > 0:
@@ -230,13 +230,13 @@ class SlimsClient:
         """Fetches a user by username"""
         return self.fetch("User", user_userName=user_name)
 
-    def add(self, table: SLIMSTABLES, data: dict):
+    def add(self, table: SLIMS_TABLES, data: dict):
         """Add a SLIMS record to a given SLIMS table"""
         record = self.db.add(table, data)
         logger.info(f"SLIMS Add: {table}/{record.pk()}")
         return record
 
-    def update(self, table: SLIMSTABLES, pk: int, data: dict):
+    def update(self, table: SLIMS_TABLES, pk: int, data: dict):
         """Update a SLIMS record"""
         record = self.db.fetch_by_pk(table, pk)
         if record is None:
@@ -245,7 +245,7 @@ class SlimsClient:
         logger.info(f"SLIMS Update: {table}/{pk}")
         return new_record
 
-    def rest_link(self, table: SLIMSTABLES, **kwargs):
+    def rest_link(self, table: SLIMS_TABLES, **kwargs):
         """Construct a url link to a SLIMS table with arbitrary filters"""
         base_url = f"{self.url}/rest/{table}"
         queries = [f"?{k}={v}" for k, v in kwargs.items()]

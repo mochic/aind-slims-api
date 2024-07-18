@@ -4,7 +4,7 @@
 from typing import Literal
 
 # List of slims tables manually accessed, there are many more
-SLIMSTABLES = Literal[
+SLIMS_TABLES = Literal[
     "Attachment",
     "Project",
     "Content",
