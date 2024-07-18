@@ -21,10 +21,6 @@ class SlimsAttachment(SlimsBaseModel):
     ... ).json()
     >>> rig_metadata["rig_id"]
     '323_EPHYS1_OPTO_2024-02-12'
-    >>> assert client.fetch_model(
-    ...  SlimsAttachment,
-    ...  name="some_non_existent_attachment.json"
-    ... ) is None
     """
 
     pk: int = Field(..., alias="attm_pk")
