@@ -26,9 +26,3 @@ class SlimsAttachment(SlimsBaseModel):
     pk: int = Field(..., alias="attm_pk")
     name: str = Field(..., alias="attm_name")
     _slims_table = "Attachment"
-
-
-if __name__ == "__main__":
-    from aind_slims_api import testmod
-
-    testmod()

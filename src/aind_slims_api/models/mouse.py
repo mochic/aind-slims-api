@@ -52,9 +52,3 @@ class SlimsMouseContent(SlimsBaseModel):
     # cntn_cf_genotype: SlimsColumn
     # cntn_cf_labtracksId: SlimsColumn
     # cntn_cf_parentBarcode: SlimsColumn
-
-
-if __name__ == "__main__":
-    from aind_slims_api import testmod
-
-    testmod()

@@ -24,9 +24,3 @@ class SlimsInstrument(SlimsBaseModel):
     _slims_table = "Instrument"
 
     # todo add more useful fields
-
-
-if __name__ == "__main__":
-    from aind_slims_api import testmod
-
-    testmod()

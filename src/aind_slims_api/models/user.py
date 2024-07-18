@@ -26,9 +26,3 @@ class SlimsUser(SlimsBaseModel):
     pk: int = Field(..., alias="user_pk")
 
     _slims_table = "User"
-
-
-if __name__ == "__main__":
-    from aind_slims_api import testmod
-
-    testmod()

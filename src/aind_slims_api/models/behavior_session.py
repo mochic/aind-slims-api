@@ -52,9 +52,3 @@ class SlimsBehaviorSession(SlimsBaseModel):
     _base_fetch_filters: ClassVar[dict[str, str]] = {
         "cnvt_name": "Behavior Session",
     }
-
-
-if __name__ == "__main__":
-    from aind_slims_api import testmod
-
-    testmod()
