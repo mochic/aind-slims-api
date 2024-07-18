@@ -5,18 +5,20 @@ import os
 import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
-from copy import deepcopy
 
 from slims.internal import Record
 
 from aind_slims_api.core import SlimsClient
-from aind_slims_api.user import fetch_user
+from aind_slims_api.models.user import SlimsUser
 
 RESOURCES_DIR = Path(os.path.dirname(os.path.realpath(__file__))) / "resources"
 
 
 class TestUser(unittest.TestCase):
     """Tests top level methods in user module"""
+
+    example_client: SlimsClient
+    example_fetch_user_response: list[Record]
 
     @classmethod
     def setUpClass(cls):
@@ -36,62 +38,11 @@ class TestUser(unittest.TestCase):
     def test_fetch_user_content_success(self, mock_fetch: MagicMock):
         """Test fetch_user when successful"""
         mock_fetch.return_value = self.example_fetch_user_response
-        user_info = fetch_user(self.example_client, username="PersonA")
+        user_info = self.example_client.fetch_model(SlimsUser, username="PersonA")
         self.assertEqual(
             self.example_fetch_user_response[0].json_entity,
             user_info.json_entity,
         )
-
-    @patch("logging.Logger.error")
-    @patch("slims.slims.Slims.fetch")
-    def test_fetch_user_content_validation_fail(
-        self, mock_fetch: MagicMock, mock_log_error: MagicMock
-    ):
-        """Test fetch_user when successful"""
-        wrong_return = deepcopy(self.example_fetch_user_response)
-        wrong_return[0].user_userName.value = 14
-        mock_fetch.return_value = wrong_return
-        user_info = fetch_user(self.example_client, username="PersonA")
-        self.assertEqual(
-            self.example_fetch_user_response[0].json_entity,
-            user_info,
-        )
-        mock_log_error.assert_called()
-
-    @patch("logging.Logger.warning")
-    @patch("slims.slims.Slims.fetch")
-    def test_fetch_user_content_no_user(
-        self, mock_fetch: MagicMock, mock_log_warn: MagicMock
-    ):
-        """Test fetch_user when no user is returned"""
-        mock_fetch.return_value = []
-        user_info = fetch_user(self.example_client, username="PersonX")
-        self.assertIsNone(user_info)
-        mock_log_warn.assert_called_with("Warning, User not in SLIMS")
-
-    @patch("logging.Logger.warning")
-    @patch("slims.slims.Slims.fetch")
-    def test_fetch_user_content_many_users(
-        self, mock_fetch: MagicMock, mock_log_warn: MagicMock
-    ):
-        """Test fetch_user_content when too many users are returned"""
-        mocked_response = [
-            self.example_fetch_user_response[0],
-            self.example_fetch_user_response[0],
-        ]
-        mock_fetch.return_value = mocked_response
-        username = "PersonA"
-        user_info = fetch_user(self.example_client, username=username)
-        self.assertEqual(
-            self.example_fetch_user_response[0].json_entity,
-            user_info.json_entity,
-        )
-        expected_warning = (
-            f"Warning, Multiple users in SLIMS with "
-            f"username {username}, "
-            f"using pk={mocked_response[0].pk()}"
-        )
-        mock_log_warn.assert_called_with(expected_warning)
 
 
 if __name__ == "__main__":

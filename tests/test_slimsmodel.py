@@ -1,13 +1,14 @@
 """ Tests the generic SlimsBaseModel"""
 
+import unittest
 from datetime import datetime
 from typing import Annotated
-import unittest
 
 from pydantic import Field
-from slims.internal import Record, Column
+from slims.internal import Column, Record
 
-from aind_slims_api.core import SlimsBaseModel, UnitSpec
+from aind_slims_api.core import SlimsBaseModel
+from aind_slims_api.models.utils import UnitSpec
 
 
 class TestSlimsModel(unittest.TestCase):

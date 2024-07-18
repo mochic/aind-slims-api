@@ -13,4 +13,4 @@ class AindSlimsApiSettings(BaseSettings):
 
     slims_url: str = "https://aind-test.us.slims.agilent.com/slimsrest/"
     slims_username: str = ""
-    slims_password: SecretStr = ""
+    slims_password: SecretStr = SecretStr("")

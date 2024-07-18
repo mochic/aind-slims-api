@@ -3,23 +3,18 @@
 import json
 import os
 import unittest
-from pathlib import Path
-from unittest.mock import MagicMock, patch
 from datetime import datetime
+from pathlib import Path
+from unittest.mock import MagicMock, patch, call
 
 from slims.internal import Record
 
 from aind_slims_api.core import SlimsClient
-from aind_slims_api.mouse import (
-    SlimsMouseContent,
-)
-from aind_slims_api.user import SlimsUser
-from aind_slims_api.instrument import SlimsInstrument
-from aind_slims_api.behavior_session import (
-    fetch_behavior_session_content_events,
-    write_behavior_session_content_events,
-    SlimsBehaviorSessionContentEvent,
-)
+from aind_slims_api.models.behavior_session import SlimsBehaviorSession
+from aind_slims_api.models.instrument import SlimsInstrument
+from aind_slims_api.models.mouse import SlimsMouseContent
+from aind_slims_api.models.user import SlimsUser
+from aind_slims_api.write_models import write_behavior_session_content_events
 
 RESOURCES_DIR = Path(os.path.dirname(os.path.realpath(__file__))) / "resources"
 
@@ -30,9 +25,9 @@ class TestBehaviorSession(unittest.TestCase):
     example_client: SlimsClient
     example_response: list[Record]
     example_mouse_response: list[Record]
-    example_behavior_sessions: list[SlimsBehaviorSessionContentEvent]
+    example_behavior_sessions: list[SlimsBehaviorSession]
     example_mouse: SlimsMouseContent
-    example_write_sessions_response: list[Record]
+    example_write_sessions_response: Record
     example_instrument: SlimsInstrument
     example_trainer: SlimsUser
 
@@ -80,7 +75,7 @@ class TestBehaviorSession(unittest.TestCase):
             cntn_cf_baselineWeight=None,
         )
         cls.example_behavior_sessions = [
-            SlimsBehaviorSessionContentEvent(
+            SlimsBehaviorSession(
                 cnvn_cf_notes="Test notes",
                 cnvn_cf_taskStage="Test stage",
                 cnvn_cf_task="Test task",
@@ -104,56 +99,38 @@ class TestBehaviorSession(unittest.TestCase):
     def test_fetch_behavior_session_content_events_success(self, mock_fetch: MagicMock):
         """Test fetch_behavior_session_content_events when successful"""
         mock_fetch.return_value = self.example_response
-        validated, unvalidated = fetch_behavior_session_content_events(
-            self.example_client, self.example_mouse
+        validated = self.example_client.fetch_models(
+            SlimsBehaviorSession,
+            mouse_pk=self.example_mouse.pk,
+            sort="date",
         )
-        ret_entities = [item.json_entity for item in validated] + [
-            item["json_entity"] for item in unvalidated
-        ]
         self.assertEqual(
             [item.json_entity for item in self.example_response],
-            ret_entities,
+            [item.json_entity for item in validated],
         )
 
     @patch("slims.slims.Slims.fetch")
-    def test_fetch_behavior_session_content_events_success_unvalidated(
+    def test_fetch_behavior_session_content_events_success_sort_list(
         self, mock_fetch: MagicMock
     ):
         """Test fetch_behavior_session_content_events when successful"""
         mock_fetch.return_value = self.example_response
-        validated, unvalidated = fetch_behavior_session_content_events(
-            self.example_client, self.example_mouse_response[0].json_entity
+        validated = self.example_client.fetch_models(
+            SlimsBehaviorSession,
+            mouse_pk=self.example_mouse.pk,
+            sort=["date"],
         )
-        ret_entities = [item.json_entity for item in validated] + [
-            item["json_entity"] for item in unvalidated
-        ]
         self.assertEqual(
             [item.json_entity for item in self.example_response],
-            ret_entities,
+            [item.json_entity for item in validated],
         )
 
-    @patch("slims.slims.Slims.fetch")
-    def test_fetch_behavior_session_content_events_failure_none(
-        self, mock_fetch: MagicMock
-    ):
-        """Test fetch_behavior_session_content_events when supplied with None"""
-        mock_fetch.return_value = self.example_response
-        with self.assertRaises(ValueError):
-            fetch_behavior_session_content_events(self.example_client, None)
-
-    @patch("slims.slims.Slims.fetch")
-    def test_fetch_behavior_session_content_events_failure_bad_value(
-        self, mock_fetch: MagicMock
-    ):
-        """Test fetch_behavior_session_content_events when supplied with None"""
-        mock_fetch.return_value = self.example_response
-        with self.assertRaises(ValueError):
-            fetch_behavior_session_content_events(self.example_client, 1)
-
+    @patch("aind_slims_api.core.logger")
     @patch("slims.slims.Slims.add")
     def test_write_behavior_session_content_events_success(
         self,
         mock_add: MagicMock,
+        mock_log_info: MagicMock
     ):
         """Test write_behavior_session_content_events success"""
         mock_add.return_value = self.example_write_sessions_response
@@ -164,10 +141,11 @@ class TestBehaviorSession(unittest.TestCase):
             [self.example_trainer],
             *self.example_behavior_sessions,
         )
-        self.assertTrue(
-            all((item.mouse_pk == self.example_mouse.pk for item in added))
-        )
+        self.assertTrue(all((item.mouse_pk == self.example_mouse.pk for item in added)))
         self.assertTrue(len(added) == len(self.example_behavior_sessions))
+        mock_log_info.assert_has_calls(
+            [call.info('SLIMS Add: ContentEvent/79')]
+        )
 
 
 if __name__ == "__main__":
