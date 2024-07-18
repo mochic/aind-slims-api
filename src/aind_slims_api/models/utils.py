@@ -9,7 +9,7 @@ from pydantic.fields import FieldInfo
 class UnitSpec:
     """Used in type annotation metadata to specify units"""
 
-    units: list[str]
+    units: tuple[str]
     preferred_unit: Optional[str] = None
 
     def __init__(self, *args, preferred_unit=None):
