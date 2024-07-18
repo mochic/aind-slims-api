@@ -99,8 +99,8 @@ class SlimsClient:
 
         return records
 
+    @staticmethod
     def resolve_model_alias(
-        self,
         model: Type[SlimsBaseModelTypeVar],
         attr_name: str,
     ) -> str:
@@ -111,8 +111,10 @@ class SlimsClient:
         else:
             raise ValueError(f"Cannot resolve alias for {attr_name} on {model}")
 
+    @staticmethod
     def _validate_models(
-        self, model_type: Type[SlimsBaseModelTypeVar], records: list[SlimsRecord]
+        model_type: Type[SlimsBaseModelTypeVar],
+        records: list[SlimsRecord]
     ) -> list[SlimsBaseModelTypeVar]:
         """Validate a list of SlimsBaseModel objects. Logs errors for records
         that fail pydantic validation."""
