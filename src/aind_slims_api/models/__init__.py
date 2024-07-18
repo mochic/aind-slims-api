@@ -9,7 +9,6 @@ from aind_slims_api.models.mouse import SlimsMouseContent
 from aind_slims_api.models.unit import SlimsUnit
 from aind_slims_api.models.user import SlimsUser
 
-
 __all__ = [
     "SlimsAttachment",
     "SlimsBehaviorSession",

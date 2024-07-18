@@ -12,8 +12,8 @@ from slims.criteria import conjunction, equals
 from slims.internal import Record, _SlimsApiException
 
 from aind_slims_api.core import SlimsAttachment, SlimsClient
-from aind_slims_api.models.unit import SlimsUnit
 from aind_slims_api.exceptions import SlimsRecordNotFound
+from aind_slims_api.models.unit import SlimsUnit
 
 RESOURCES_DIR = Path(os.path.dirname(os.path.realpath(__file__))) / "resources"
 

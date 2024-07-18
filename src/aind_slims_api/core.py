@@ -20,11 +20,10 @@ from slims.internal import Record as SlimsRecord
 from slims.slims import Slims, _SlimsApiException
 
 from aind_slims_api import config
+from aind_slims_api.exceptions import SlimsRecordNotFound
 from aind_slims_api.models.attachment import SlimsAttachment
 from aind_slims_api.models.base import SlimsBaseModel
 from aind_slims_api.types import SLIMS_TABLES
-from aind_slims_api.exceptions import SlimsRecordNotFound
-
 
 logger = logging.getLogger(__name__)
 
@@ -114,8 +113,7 @@ class SlimsClient:
 
     @staticmethod
     def _validate_models(
-        model_type: Type[SlimsBaseModelTypeVar],
-        records: list[SlimsRecord]
+        model_type: Type[SlimsBaseModelTypeVar], records: list[SlimsRecord]
     ) -> list[SlimsBaseModelTypeVar]:
         """Validate a list of SlimsBaseModel objects. Logs errors for records
         that fail pydantic validation."""
