@@ -13,6 +13,7 @@ from slims.internal import Record, _SlimsApiException
 
 from aind_slims_api.core import SlimsAttachment, SlimsClient
 from aind_slims_api.models.unit import SlimsUnit
+from aind_slims_api.exceptions import SlimsRecordNotFound
 
 RESOURCES_DIR = Path(os.path.dirname(os.path.realpath(__file__))) / "resources"
 
@@ -238,6 +239,13 @@ class TestSlimsClient(unittest.TestCase):
         returned_model = self.example_client.update_model(updated_model)
         self.assertEqual(updated_model, returned_model)
         mock_log.assert_called_once_with("SLIMS Update: Unit/31")
+
+    @patch("slims.slims.Slims.fetch")
+    def test_fetch_model_no_records(self, mock_slims_fetch: MagicMock):
+        """Tests fetch_user method"""
+        mock_slims_fetch.return_value = []
+        with self.assertRaises(SlimsRecordNotFound):
+            self.example_client.fetch_model(SlimsUnit)
 
     def test_fetch_attachments(self):
         """Tests fetch_attachments method success."""

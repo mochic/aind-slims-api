@@ -23,6 +23,7 @@ from aind_slims_api import config
 from aind_slims_api.models.attachment import SlimsAttachment
 from aind_slims_api.models.base import SlimsBaseModel
 from aind_slims_api.types import SLIMSTABLES
+from aind_slims_api.exceptions import SlimsRecordNotFound
 
 
 logger = logging.getLogger(__name__)
@@ -178,7 +179,7 @@ class SlimsClient:
         start: Optional[int] = None,
         end: Optional[int] = None,
         **kwargs,
-    ) -> SlimsBaseModelTypeVar:
+    ) -> SlimsBaseModelTypeVar | None:
         """Fetch a single record from SLIMS and return it as a validated
          SlimsBaseModel object.
 
@@ -196,6 +197,8 @@ class SlimsClient:
         )
         if len(records) > 0:
             logger.debug(f"Found {len(records)} records for {model}.")
+        if len(records) < 1:
+            raise SlimsRecordNotFound("No record found.")
         return records[0]
 
     def fetch_attachments(
