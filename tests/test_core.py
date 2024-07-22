@@ -268,20 +268,17 @@ class TestSlimsClient(unittest.TestCase):
         )
         self.assertEqual(1, len(attachments))
 
-    def test_fetch_attachment_content(self):
+    @patch("slims.slims._SlimsApi.get")
+    def test_fetch_attachment_content(self, mock_get: MagicMock):
         """Tests fetch_attachment_content method success."""
-        # slims_api is dynamically added to slims client
-        with patch.object(
-            self.example_client.db.slims_api,
-            "get",
-            return_value=Response(),
-        ):
-            self.example_client.fetch_attachment_content(
-                SlimsAttachment(
-                    attm_name="test",
-                    attm_pk=1,
-                )
+        mock_get.return_value = Response()
+        self.example_client.fetch_attachment_content(
+            SlimsAttachment(
+                attm_name="test",
+                attm_pk=1,
             )
+        )
+        mock_get.assert_called_once()
 
     @patch("slims.internal._SlimsApi.post")
     def test_add_attachment_content(self, mock_post: MagicMock):
@@ -306,7 +303,6 @@ class TestSlimsClient(unittest.TestCase):
     @patch("slims.internal._SlimsApi.post")
     def test_add_attachment_content_no_pk(self, mock_post: MagicMock):
         """Tests add_attachment_content method failure due to lack of pk."""
-        # slims_api is dynamically added to slims client
         mock_response = MagicMock()
         mock_response.text.return_value = self.example_add_attachments_response_text
         mock_post.return_value = mock_response
