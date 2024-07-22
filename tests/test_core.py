@@ -297,15 +297,20 @@ class TestSlimsClient(unittest.TestCase):
             "post",
             return_value=mock_response,
         ) as mock_post:
+            unit_pk = 1
             self.example_client.add_attachment_content(
                 SlimsUnit(
                     unit_name="test",
-                    unit_pk=1,
+                    unit_pk=unit_pk,
                 ),
                 "test",
                 "some test content",
             )
-            assert mock_post.call_count == 1
+            self.assertEqual(mock_post.call_count, 1)
+            self.assertEqual(
+                mock_post.mock_calls[0].kwargs["body"]['atln_recordPk'],
+                unit_pk
+            )
 
     def test_add_attachment_content_no_pk(self):
         """Tests add_attachment_content method failure due to lack of pk."""
@@ -323,7 +328,7 @@ class TestSlimsClient(unittest.TestCase):
                     "test",
                     "some test content",
                 )
-            assert mock_post.call_count == 0
+            mock_post.assert_not_called()
 
     @patch("logging.Logger.error")
     def test__validate_model_invalid_model(self, mock_log: MagicMock):
